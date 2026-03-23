@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSkins</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <style>
+    /* Fallback if Google Fonts fail to load (offline) */
+    @supports not (font-variation-settings: normal) {
+      .material-symbols-outlined { font-family: system-ui; }
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface">
+
+  <!-- ===== HEADER ===== -->
+  <header class="fixed top-0 left-0 z-50 glass-header shadow-ambient px-5 py-2.5 flex justify-between items-center" style="width: 400px;">
+    <div class="flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1;">palette</span>
+      <h1 class="font-headline font-extrabold tracking-tighter text-primary text-lg leading-none">WebSkins</h1>
+    </div>
+    <button id="btn-settings" class="text-on-surface-variant hover:bg-primary/5 p-1.5 rounded-xl transition-colors duration-200 active:scale-95" title="Settings">
+      <span class="material-symbols-outlined text-[18px]">settings</span>
+    </button>
+  </header>
+
+  <!-- ===== HOME VIEW ===== -->
+  <main id="home-view" class="h-full pt-[42px] overflow-y-auto custom-scrollbar">
+
+    <!-- Active Skin Banner -->
+    <section id="active-skin-banner" class="hidden px-5 pt-2.5 pb-1">
+      <div class="bg-primary/5 rounded-xl p-2.5 flex items-center gap-2.5">
+        <span class="material-symbols-outlined text-primary text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+        <div class="flex-1 min-w-0">
+          <p class="text-[11px] font-bold text-primary truncate" id="active-skin-name">Active Skin</p>
+          <p class="text-[9px] text-on-surface-variant">Currently applied</p>
+        </div>
+        <button id="btn-edit-skin" class="text-[9px] font-bold text-primary px-2 py-0.5 rounded-lg hover:bg-primary/10 transition-colors">EDIT</button>
+        <button id="btn-remove-skin" class="text-[9px] font-bold text-error px-2 py-0.5 rounded-lg hover:bg-error/10 transition-colors">REMOVE</button>
+      </div>
+    </section>
+
+    <!-- API Key Section -->
+    <section id="api-key-section" class="px-5 py-2.5 border-b border-outline-variant/10">
+      <div class="bg-surface-container-low rounded-xl p-2.5 flex gap-2 items-center">
+        <input id="api-key-input" class="flex-1 bg-transparent border-none text-xs focus:ring-0 focus:outline-none placeholder:text-on-surface-variant/50 font-medium px-1" placeholder="API Key" type="password" aria-label="API Key">
+        <button id="btn-save-key" class="bg-surface-container-lowest text-primary text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm hover:bg-white active:scale-95 transition-all">
+          SAVE
+        </button>
+      </div>
+      <p id="api-key-status" class="text-[9px] text-on-surface-variant mt-1 px-1 hidden"></p>
+    </section>
+
+    <!-- Generate Section -->
+    <section class="px-5 pt-4 pb-3 space-y-3">
+      <div class="flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+        <h2 class="font-headline font-bold text-base tracking-tight">Create New Skin</h2>
+      </div>
+      <div>
+        <textarea id="prompt-input" class="w-full bg-surface-container-low border-none rounded-xl p-3 text-xs resize-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-on-surface-variant/40 focus:outline-none" placeholder="Describe your dream website look... e.g. 'Neon Cyberpunk with glass textures'" rows="3" aria-label="Skin prompt"></textarea>
+        <button id="btn-generate" class="w-full mt-2.5 bg-gradient-to-r from-primary to-primary-container text-on-primary font-bold py-2.5 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+          <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">magic_button</span>
+          <span id="generate-btn-text">Generate Skin</span>
+        </button>
+        <button id="btn-cancel-generate" class="hidden w-full mt-1.5 bg-surface-container-low text-error text-xs font-bold py-2 rounded-xl hover:bg-error/5 active:scale-[0.98] transition-all">
+          Cancel Generation
+        </button>
+      </div>
+    </section>
+
+    <!-- History Section -->
+    <section id="history-section" class="py-1 hidden">
+      <div class="px-5 mb-2">
+        <h2 class="font-headline font-bold text-[11px] text-on-surface-variant tracking-wide uppercase">Your History</h2>
+      </div>
+      <div id="history-list" class="flex overflow-x-auto gap-3 px-5 pb-3 custom-scrollbar snap-x">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- Community Section -->
+    <section id="community-section" class="px-5 pt-3 pb-6">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="font-headline font-bold text-[11px] text-on-surface-variant tracking-wide uppercase">Community</h2>
+        <div class="flex bg-surface-container-low rounded-lg p-0.5">
+          <button id="sort-hot" class="sort-tab sort-tab-active text-[9px] font-bold px-2.5 py-1 rounded-md transition-all flex items-center gap-1">
+            <span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+            Hot
+          </button>
+          <button id="sort-new" class="sort-tab text-[9px] font-bold px-2.5 py-1 rounded-md transition-all text-on-surface-variant">
+            New
+          </button>
+        </div>
+      </div>
+      <div id="community-list" class="space-y-3 pb-8">
+        <p class="text-[10px] text-on-surface-variant text-center py-6">Loading...</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== CHAT VIEW ===== -->
+  <main id="chat-view" class="hidden h-full pt-[42px] flex flex-col">
+    <div class="px-3 py-2 flex items-center gap-2 border-b border-outline-variant/10 bg-surface-container-low/50">
+      <button id="btn-chat-back" class="text-on-surface-variant hover:bg-primary/5 p-1 rounded-lg transition-colors active:scale-95">
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+      </button>
+      <div class="flex-1 min-w-0">
+        <h2 class="font-bold text-xs truncate" id="chat-skin-name">Editing Skin</h2>
+        <p class="text-[9px] text-on-surface-variant" id="chat-domain">website.com</p>
+      </div>
+      <button id="btn-publish-skin" class="text-[9px] font-bold text-tertiary bg-tertiary/10 px-2 py-1 rounded-lg active:scale-95 transition-all">PUBLISH</button>
+      <button id="btn-save-skin" class="text-[9px] font-bold text-on-primary bg-primary px-2 py-1 rounded-lg active:scale-95 transition-all">SAVE</button>
+    </div>
+    <div id="chat-messages" class="flex-1 overflow-y-auto px-3 py-3 space-y-3 custom-scrollbar">
+    </div>
+    <div class="px-3 py-2 border-t border-outline-variant/10 bg-surface">
+      <div class="flex gap-2 items-end">
+        <div class="flex-1 bg-surface-container-low rounded-xl p-2.5">
+          <input id="chat-input" type="text" class="w-full bg-transparent border-none text-xs focus:ring-0 focus:outline-none placeholder:text-on-surface-variant/40 font-medium" placeholder="Refine your skin..." aria-label="Chat message">
+        </div>
+        <button id="btn-chat-send" class="bg-gradient-to-r from-primary to-primary-container text-on-primary p-2.5 rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-50">
+          <span class="material-symbols-outlined text-base">send</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== SETTINGS VIEW ===== -->
+  <main id="settings-view" class="hidden h-full pt-[42px] overflow-y-auto custom-scrollbar">
+    <div class="px-5 py-3">
+      <div class="flex items-center gap-2 mb-5">
+        <button id="btn-settings-back" class="text-on-surface-variant hover:bg-primary/5 p-1 rounded-lg transition-colors active:scale-95">
+          <span class="material-symbols-outlined text-base">arrow_back</span>
+        </button>
+        <h2 class="font-headline font-bold text-base tracking-tight">Settings</h2>
+      </div>
+      <div class="mb-5">
+        <label class="text-[10px] font-bold text-on-surface-variant tracking-wide block mb-1.5">API KEY</label>
+        <div class="bg-surface-container-low rounded-xl p-2.5 flex gap-2 items-center">
+          <input id="settings-api-key" class="w-full bg-transparent border-none text-xs focus:ring-0 focus:outline-none placeholder:text-on-surface-variant/50 font-medium px-1" placeholder="sk-ant-..." type="password" aria-label="Settings API Key">
+          <button id="btn-settings-save-key" class="bg-surface-container-lowest text-primary text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm hover:bg-white active:scale-95 transition-all">SAVE</button>
+        </div>
+        <p id="settings-key-status" class="text-[9px] text-on-surface-variant mt-1 px-1"></p>
+      </div>
+      <div class="mb-5">
+        <label class="text-[10px] font-bold text-on-surface-variant tracking-wide block mb-1.5">AI MODEL</label>
+        <div class="bg-surface-container-low rounded-xl p-2.5">
+          <select id="settings-model" class="w-full bg-transparent border-none text-xs focus:ring-0 focus:outline-none font-medium appearance-none cursor-pointer" aria-label="AI Model">
+            <option value="claude-opus-4-20250514">Claude Opus 4 (Best Quality)</option>
+            <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (Faster)</option>
+          </select>
+        </div>
+        <p class="text-[9px] text-on-surface-variant mt-1 px-1">Auto-improves until quality is great (up to 4 review cycles)</p>
+      </div>
+      <div class="mb-5">
+        <label class="text-[10px] font-bold text-on-surface-variant tracking-wide block mb-1.5">DATA</label>
+        <button id="btn-clear-history" class="w-full bg-surface-container-low text-error text-xs font-bold py-2.5 rounded-xl hover:bg-error/5 transition-colors active:scale-[0.98]">
+          Clear All Skins
+        </button>
+      </div>
+      <div class="text-center py-3">
+        <p class="text-[9px] text-on-surface-variant">WebSkins v1.0.0 — Powered by Claude AI</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== STATUS BAR ===== -->
+  <div id="status-bar" class="fixed bottom-3 left-1/2 -translate-x-1/2 bg-on-background text-surface-container-lowest px-3 py-1.5 rounded-full text-[9px] font-bold tracking-widest shadow-2xl flex items-center gap-1.5 pointer-events-none opacity-0 transition-opacity duration-300 z-50">
+    <span id="status-dot" class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+    <span id="status-text">READY</span>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
