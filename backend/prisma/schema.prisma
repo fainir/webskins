@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Skin {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  css         String   @db.Text
+  domain      String
+  prompt      String?
+  authorName  String
+  authorId    String   // anonymous fingerprint from extension
+  thumbnail   String?  @db.Text
+  likes       Int      @default(0)
+  installs    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([domain])
+  @@index([likes(sort: Desc)])
+  @@index([installs(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+}

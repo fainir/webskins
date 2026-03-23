@@ -1,0 +1,17 @@
+{
+  "name": "webskins",
+  "version": "1.0.0",
+  "description": "AI-powered website skin generator Chrome extension",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "build:css": "npx tailwindcss -i src/popup.css -o dist/popup.css --minify",
+    "build:icons": "node scripts/generate-icons.js",
+    "watch": "npx tailwindcss -i src/popup.css -o dist/popup.css --watch",
+    "dev": "npm run build && npm run watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17",
+    "sharp": "^0.33.5"
+  }
+}
