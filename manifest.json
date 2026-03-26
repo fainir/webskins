@@ -1,12 +1,11 @@
 {
   "manifest_version": 3,
   "name": "WebSkins",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI-powered website skin generator. Transform any website's look with natural language.",
   "permissions": [
     "storage",
     "activeTab",
-    "scripting",
     "tabs"
   ],
   "host_permissions": [
