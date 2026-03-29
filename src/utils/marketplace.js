@@ -32,18 +32,6 @@ export async function fetchSkinsByDomain(domain, page = 1, sort = 'trending') {
   }
 }
 
-export async function searchSkins(query, page = 1) {
-  try {
-    const params = new URLSearchParams({ search: query, page: String(page), limit: '20' });
-    const res = await fetch(`${getBaseUrl()}/api/skins?${params}`);
-    if (!res.ok) return { skins: [], pagination: {} };
-
-    return res.json();
-  } catch {
-    return { skins: [], pagination: {} };
-  }
-}
-
 export async function getSkinDetails(id) {
   const res = await fetch(`${getBaseUrl()}/api/skins/${id}`);
   if (!res.ok) throw new Error('Skin not found');
