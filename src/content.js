@@ -22,7 +22,15 @@
       // Remove behavior (IE XSS vector)
       .replace(/behavior\s*:[^;]+;?/gi, '')
       // Remove expression() (IE XSS vector)
-      .replace(/expression\s*\([^)]*\)/gi, '');
+      .replace(/expression\s*\([^)]*\)/gi, '')
+      // Remove @font-face blocks with external URLs
+      .replace(/@font-face\s*\{[^}]*src\s*:[^}]*url\s*\([^)]*https?:\/\/[^}]*\}/gi, '/* @font-face removed */')
+      // Remove cursor with external URLs
+      .replace(/cursor\s*:[^;]*url\s*\(\s*(['"]?)\s*(?!data:|#)https?:\/\/[^)]+\1\s*\)[^;]*;?/gi, 'cursor: default !important;')
+      // Remove -webkit-mask-image with external URLs
+      .replace(/-webkit-mask-image\s*:[^;]*url\s*\(\s*(['"]?)\s*(?!data:|#)https?:\/\/[^)]+\1\s*\)[^;]*;?/gi, '')
+      // Remove mask-image with external URLs
+      .replace(/mask-image\s*:[^;]*url\s*\(\s*(['"]?)\s*(?!data:|#)https?:\/\/[^)]+\1\s*\)[^;]*;?/gi, '');
   }
 
   // ===== CSS Injection =====

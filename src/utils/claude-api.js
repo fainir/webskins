@@ -88,7 +88,7 @@ QUALITY SCORING:
 
 The CSS MUST be COMPLETE — it replaces ALL previous CSS. Include everything that works plus your fixes. Aim for 50-150+ rules for thorough coverage.`;
 
-export async function generateSkin(apiKey, model, pageStructure, prompt, existingCss) {
+export async function generateSkin(apiKey, model, pageStructure, prompt, existingCss, signal) {
   const messages = [];
 
   let userContent = `Here is the simplified HTML structure of the current webpage:\n\n${pageStructure}\n\n`;
@@ -102,10 +102,10 @@ export async function generateSkin(apiKey, model, pageStructure, prompt, existin
 
   messages.push({ role: 'user', content: userContent });
 
-  return callClaude(apiKey, model, SYSTEM_PROMPT, messages);
+  return callClaude(apiKey, model, SYSTEM_PROMPT, messages, signal);
 }
 
-export async function evaluateSkin(apiKey, model, screenshotBase64, currentCss, originalPrompt, pageStructure) {
+export async function evaluateSkin(apiKey, model, screenshotBase64, currentCss, originalPrompt, pageStructure, signal) {
   const messages = [
     {
       role: 'user',
@@ -136,7 +136,7 @@ Review the screenshot above. Find EVERY visual issue and produce an improved, CO
     },
   ];
 
-  return callClaude(apiKey, model, EVALUATION_PROMPT, messages);
+  return callClaude(apiKey, model, EVALUATION_PROMPT, messages, signal);
 }
 
 export async function chatRefine(apiKey, model, pageStructure, chatHistory, newMessage) {
@@ -178,7 +178,7 @@ export async function chatRefine(apiKey, model, pageStructure, chatHistory, newM
   return callClaude(apiKey, model, SYSTEM_PROMPT, messages);
 }
 
-async function callClaude(apiKey, model, systemPrompt, messages) {
+async function callClaude(apiKey, model, systemPrompt, messages, signal) {
   const body = {
     model,
     max_tokens: 32000,
@@ -199,6 +199,7 @@ async function callClaude(apiKey, model, systemPrompt, messages) {
       'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify(body),
+    signal,
   });
 
   if (!response.ok) {

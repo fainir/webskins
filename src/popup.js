@@ -389,10 +389,21 @@ async function handleSettingsSaveKey() {
   showKeyStatus('settings-key-status', 'Key saved!', 'success');
 }
 
+let lastGenerateTime = 0;
+
 async function handleGenerate() {
+  const now = Date.now();
+  if (now - lastGenerateTime < 1000) return;
+  lastGenerateTime = now;
+
   if (state.isGenerating) return;
   const prompt = document.getElementById('prompt-input').value.trim();
   if (!prompt) return;
+
+  if (prompt.length > 2000) {
+    showStatus('Prompt too long (max 2000 chars)', 'error');
+    return;
+  }
 
   if (!state.apiKeySet) {
     document.getElementById('api-key-section').classList.remove('hidden');
@@ -402,7 +413,15 @@ async function handleGenerate() {
 
   state.isGenerating = true;
   state.generationCancelled = false;
-  state.progressMessage = 'Starting...';
+  state.progressMessage = 'Designing your skin...';
+
+  // Immediately switch to chat view with the user's prompt visible
+  state.currentSkin = null;
+  state.chatMessages = [
+    { role: 'user', content: prompt, timestamp: Date.now() },
+  ];
+  state.view = 'chat';
+  document.getElementById('prompt-input').value = '';
   render();
 
   try {
@@ -419,11 +438,6 @@ async function handleGenerate() {
     state.currentSkin = response.skin;
     state.chatMessages = response.skin.chatHistory || [];
 
-    // Clear prompt
-    document.getElementById('prompt-input').value = '';
-
-    // Switch to chat view
-    state.view = 'chat';
     await refreshSkins();
     render();
 
@@ -439,6 +453,9 @@ function handleCancelGenerate() {
   state.generationCancelled = true;
   state.isGenerating = false;
   state.progressMessage = '';
+  if (state.tabId) {
+    chrome.runtime.sendMessage({ action: 'cancel-generation', tabId: state.tabId }).catch(() => {});
+  }
   render();
   showStatus('Generation cancelled', 'warning');
 }
@@ -548,6 +565,7 @@ async function handleSaveSkinFromChat() {
       action: 'save-skin',
       domain: state.domain,
       skin: state.currentSkin,
+      activate: true,
     });
     showStatus('Skin saved!');
   } catch (err) {

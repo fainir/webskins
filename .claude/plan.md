@@ -42,7 +42,7 @@ AI-powered Chrome extension that lets users transform any website's appearance w
 - [x] Express + Prisma + PostgreSQL API
 - [x] Endpoints: browse, publish, install, like
 - [x] Integration with extension (community trending section)
-- [ ] Deploy to Railway (needs `railway up` with DATABASE_URL)
+- [x] Deploy to Railway (deployed, health check passing, DB connected)
 
 ---
 
