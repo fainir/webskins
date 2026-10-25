@@ -184,10 +184,9 @@ async function callClaude(apiKey, model, systemPrompt, messages, signal) {
     max_tokens: 32000,
     system: systemPrompt,
     messages,
-    thinking: {
-      type: 'enabled',
-      budget_tokens: 16000,
-    },
+    // Claude 5.5 models decide how much to think; a fixed thinking budget is rejected.
+    thinking: { type: 'adaptive' },
+    output_config: { effort: 'high' },
   };
 
   const response = await fetch(API_URL, {
