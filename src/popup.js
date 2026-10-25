@@ -17,7 +17,7 @@ const state = {
   view: 'home', // 'home' | 'chat' | 'settings'
   apiKey: null,
   apiKeySet: false,
-  model: 'claude-opus-4-20250514',
+  model: 'claude-opus-5-5',
   domain: '',
   tabId: null,
   isGenerating: false,

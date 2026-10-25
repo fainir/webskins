@@ -17,9 +17,14 @@ export async function setApiKey(key) {
   await chrome.storage.local.set({ [KEYS.API_KEY]: key });
 }
 
+// Models the settings menu offers. A saved model that is no longer offered
+// (Claude Opus 4 and Sonnet 4 were retired) falls back to the default.
+export const MODELS = ['claude-opus-5-5', 'claude-sonnet-5-5'];
+const DEFAULT_MODEL = MODELS[0];
+
 export async function getModel() {
   const result = await chrome.storage.local.get(KEYS.MODEL);
-  return result[KEYS.MODEL] || 'claude-opus-4-20250514';
+  return MODELS.includes(result[KEYS.MODEL]) ? result[KEYS.MODEL] : DEFAULT_MODEL;
 }
 
 export async function setModel(model) {
