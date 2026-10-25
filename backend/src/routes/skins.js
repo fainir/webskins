@@ -21,10 +21,11 @@ skinsRouter.get('/', async (req, res) => {
     const where = {};
     if (domain) where.domain = domain;
     if (search) {
+      // SQLite's LIKE is already case-insensitive for ASCII text.
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-        { authorName: { contains: search, mode: 'insensitive' } },
+        { name: { contains: search } },
+        { description: { contains: search } },
+        { authorName: { contains: search } },
       ];
     }
 

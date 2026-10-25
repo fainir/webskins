@@ -3,7 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  // A SQLite file on the service volume: the marketplace is one small table.
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -11,12 +12,12 @@ model Skin {
   id          String   @id @default(cuid())
   name        String
   description String?
-  css         String   @db.Text
+  css         String
   domain      String
   prompt      String?
   authorName  String
   authorId    String   // anonymous fingerprint from extension
-  thumbnail   String?  @db.Text
+  thumbnail   String?
   likes       Int      @default(0)
   installs    Int      @default(0)
   createdAt   DateTime @default(now())
