@@ -54,3 +54,5 @@ counts and a known private management key in a separate test deployment before c
 routing. Review publications/deletions since the snapshot; never assume the snapshot contains
 later deletion requests. `backend/test/api.test.js` exercises a real fresh restore and proves
 private ownership survives it using disposable synthetic rows only.
+
+New generation defaults to Claude Sonnet 5.5 for balanced CSS/design quality and cost. Claude Opus 5.5 remains an explicit advanced option. Retired or unknown saved model IDs resolve to the current Sonnet default before a provider request; API keys, saved skins and explicit current model choices are retained.
