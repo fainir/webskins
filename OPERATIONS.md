@@ -33,8 +33,8 @@ rate limit. Likes/installs deduplicate each skin/network/day in the database; th
 counters, not independently verified people. HMAC network identifiers are retained for quota
 accounting and old metric rows are pruned after90 days on startup.
 
-The shared CSS parser removes resource URLs, imports, webfonts, raw syntax and variable
-indirection, including escaped forms and image-set strings. Generation uses literal values
+The shared CSS parser removes resource URLs, imports, webfonts, raw syntax and page-variable
+indirection (safe variables defined by the skin are resolved to literal values), including escaped forms and image-set strings. Generation uses literal values
 and system fonts to match this policy. On first AI use for each origin, the user sees the
 Anthropic destination, visible-text/layout and screenshot disclosure, selected model and up to
 five paid requests. Settings can revoke consent. Local application/removal needs no AI call.

@@ -28,3 +28,19 @@ test('keeps useful local styles, gradients, layout and media rules',()=>{
  assert.match(clean,/@media/);assert.match(clean,/linear-gradient/);assert.match(clean,/color:#eee/);assert.match(clean,/font-family:system-ui,sans-serif/);
 });
 test('rejects oversized and malformed CSS',()=>{assert.equal(sanitizeCss('x'.repeat(100001)),'');assert.equal(sanitizeCss('a{background:url("unterminated}'),'');});
+test('resolves a skin palette without consulting or changing page variables',()=>{
+ const clean=sanitizeCss(':root{--bg:#123;--space:8px}.card{background:var(--bg);padding:calc(var(--space) + 2px);color:var(--missing,#eee)}');
+ assert.match(clean,/background:#123/);assert.match(clean,/8px/);assert.match(clean,/color:#eee/);assert.ok(!clean.includes('var('));assert.ok(!clean.includes('--bg:'));
+ const cycle=sanitizeCss(':root{--a:var(--b);--b:var(--a)}.card{background:var(--a);color:red}');
+ assert.ok(!cycle.includes('background:'));assert.match(cycle,/color:red/);
+});
+test('bounds repeated palette expansion and rejects indirect resource values',()=>{
+ const definitions=['--v0:1px'];
+ for(let i=1;i<=16;i++)definitions.push(`--v${i}:var(--v${i-1}) var(--v${i-1}) var(--v${i-1})`);
+ const clean=sanitizeCss(`:root{${definitions.join(';')}}.card{padding:var(--v16);color:red}`);
+ assert.ok(clean.length<=100_000);assert.ok(!clean.includes('padding:'));
+ const indirect=sanitizeCss(':root{--url:url(https://tracker.example/p);--nested:var(--url)}a{background:var(--nested);color:var(--absent,var(--nested));border-color:var(--absent,#123)}');
+ assert.ok(!indirect.includes('tracker.example'));assert.match(indirect,/border-color:#123/);
+ const ambiguous=sanitizeCss(':root{--color:red}.other{--color:blue}a{color:var(--color);background:var(--color,#eee)}');
+ assert.ok(!ambiguous.includes('color:'));assert.match(ambiguous,/background:#eee/);
+});
