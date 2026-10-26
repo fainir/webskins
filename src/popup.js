@@ -1,3 +1,4 @@
+import {revokeAiConsent} from './utils/privacy.js';
 // WebSkins Popup — State Management & UI
 import {
   getApiKey, setApiKey, getModel, setModel,
@@ -330,6 +331,7 @@ function setupEventListeners() {
   });
 
   // Settings
+  document.getElementById('btn-revoke-ai-access').addEventListener('click',async()=>{await revokeAiConsent();showStatus('AI page access revoked. Next generation asks again.');});
   document.getElementById('btn-settings-save-key').addEventListener('click', handleSettingsSaveKey);
   document.getElementById('settings-model').addEventListener('change', async (e) => {
     state.model = e.target.value;
@@ -391,6 +393,17 @@ async function handleSettingsSaveKey() {
 
 let lastGenerateTime = 0;
 
+async function ensureAiConsent() {
+  const context=await chrome.runtime.sendMessage({action:'get-ai-consent',tabId:state.tabId});
+  if(context.error){showStatus(context.error,'error');return false;}
+  if(context.granted)return true;
+  const approved=confirm(`Allow AI styling on ${context.origin}?\n\nVisible page text and layout, your prompt, and up to four screenshots will be sent to Anthropic using ${state.model}. They can include private messages, photos or other information visible on the page.\n\nEach generation or refinement can make up to five paid API requests charged to your Anthropic account. Keep this tab active during visual reviews.\n\nAllow for this site? You can revoke access in Settings.`);
+  if(!approved)return false;
+  const result=await chrome.runtime.sendMessage({action:'record-ai-consent',tabId:state.tabId});
+  if(result.error){showStatus(result.error,'error');return false;}
+  return true;
+}
+
 async function handleGenerate() {
   const now = Date.now();
   if (now - lastGenerateTime < 1000) return;
@@ -411,6 +424,7 @@ async function handleGenerate() {
     return;
   }
 
+  if(!await ensureAiConsent())return;
   state.isGenerating = true;
   state.generationCancelled = false;
   state.progressMessage = 'Designing your skin...';
@@ -464,6 +478,8 @@ async function handleChatSend() {
   const input = document.getElementById('chat-input');
   const message = input.value.trim();
   if (!message || state.isGenerating) return;
+
+  if(!await ensureAiConsent())return;
 
   // Add user message
   state.chatMessages.push({
@@ -713,6 +729,7 @@ async function handleVoteSkin(skinId) {
 async function handlePublishSkin() {
   if (!state.currentSkin) return;
 
+  if(!confirm('Publish this skin publicly? Its CSS, prompt, site name and your display name will be visible to everyone. Do not publish private page details.'))return;
   const authorName = prompt('Your display name for the marketplace:');
   if (!authorName) return;
 

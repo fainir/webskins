@@ -1,31 +1,12 @@
-import express from 'express';
-import cors from 'cors';
-import { execSync } from 'child_process';
-import { skinsRouter } from './routes/skins.js';
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(cors());
-app.use(express.json({ limit: '5mb' }));
-
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'webskins-api' });
-});
-
-// Routes
-app.use('/api/skins', skinsRouter);
-
-// Start server first, then migrate DB in background
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`WebSkins API running on port ${PORT}`);
-
-  // Run prisma db push in background after server starts
-  try {
-    execSync('npx prisma db push --skip-generate', { stdio: 'inherit', timeout: 30000 });
-    console.log('Database schema synced');
-  } catch (err) {
-    console.error('DB sync failed (will retry on next deploy):', err.message);
-  }
-});
+import {createApp} from './app.js';
+import {initializeStore,backupStore} from './store.js';
+import {prisma} from './routes/skins.js';
+try {
+  await initializeStore();
+  const server=createApp().listen(process.env.PORT||3000,'0.0.0.0',()=>console.log('WebSkins API ready'));
+  const timer=setInterval(()=>{void backupStore().catch(()=>console.error('Marketplace backup failed'));},24*60*60*1000);timer.unref();
+  // Keep daily quota evidence bounded without clearing current-day limits.
+  const cutoff=new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10);
+  await prisma.metric.deleteMany({where:{day:{lt:cutoff}}});
+  process.once('SIGTERM',()=>{clearInterval(timer);server.close(()=>{void prisma.$disconnect().finally(()=>process.exit(0));});});
+} catch {console.error('Marketplace database/config initialization failed; server not started');process.exit(1);}

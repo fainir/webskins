@@ -1,3 +1,4 @@
+import {buildSync} from 'esbuild';
 import { cpSync, mkdirSync, rmSync, existsSync } from 'fs';
 import { execSync } from 'child_process';
 
@@ -13,10 +14,11 @@ mkdirSync(`${DIST}/icons`, { recursive: true });
 cpSync('src/popup.html', `${DIST}/popup.html`);
 cpSync('src/popup.js', `${DIST}/popup.js`);
 cpSync('src/background.js', `${DIST}/background.js`);
-cpSync('src/content.js', `${DIST}/content.js`);
+buildSync({entryPoints:['src/content.js'],outfile:`${DIST}/content.js`,bundle:true,format:'iife',target:'chrome120',minify:true,legalComments:'none'});
 cpSync('src/utils/claude-api.js', `${DIST}/utils/claude-api.js`);
 cpSync('src/utils/storage.js', `${DIST}/utils/storage.js`);
 cpSync('src/utils/marketplace.js', `${DIST}/utils/marketplace.js`);
+cpSync('src/utils/privacy.js', `${DIST}/utils/privacy.js`);
 cpSync('manifest.json', `${DIST}/manifest.json`);
 
 // Copy icons if they exist

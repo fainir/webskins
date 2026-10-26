@@ -1,3 +1,4 @@
+import {sanitizeCss} from "../backend/src/css-safety.js";
 // WebSkins Content Script
 // Runs on every page — handles CSS injection, DOM capture, and auto-apply
 
@@ -9,29 +10,6 @@
   const STORAGE_KEY_SKINS = 'webskins_skins';
 
   // ===== CSS Sanitization =====
-
-  function sanitizeCss(css) {
-    // Remove dangerous CSS patterns that could be used for tracking or data exfiltration
-    return css
-      // Remove @import rules (can load external stylesheets)
-      .replace(/@import\s+[^;]+;?/gi, '/* @import removed */')
-      // Remove url() values pointing to external resources (keep data: and local refs)
-      .replace(/url\s*\(\s*(['"]?)\s*(?!data:|#)https?:\/\/[^)]+\1\s*\)/gi, 'url(about:blank)')
-      // Remove -moz-binding (Firefox XSS vector)
-      .replace(/-moz-binding\s*:[^;]+;?/gi, '')
-      // Remove behavior (IE XSS vector)
-      .replace(/behavior\s*:[^;]+;?/gi, '')
-      // Remove expression() (IE XSS vector)
-      .replace(/expression\s*\([^)]*\)/gi, '')
-      // Remove @font-face blocks with external URLs
-      .replace(/@font-face\s*\{[^}]*src\s*:[^}]*url\s*\([^)]*https?:\/\/[^}]*\}/gi, '/* @font-face removed */')
-      // Remove cursor with external URLs
-      .replace(/cursor\s*:[^;]*url\s*\(\s*(['"]?)\s*(?!data:|#)https?:\/\/[^)]+\1\s*\)[^;]*;?/gi, 'cursor: default !important;')
-      // Remove -webkit-mask-image with external URLs
-      .replace(/-webkit-mask-image\s*:[^;]*url\s*\(\s*(['"]?)\s*(?!data:|#)https?:\/\/[^)]+\1\s*\)[^;]*;?/gi, '')
-      // Remove mask-image with external URLs
-      .replace(/mask-image\s*:[^;]*url\s*\(\s*(['"]?)\s*(?!data:|#)https?:\/\/[^)]+\1\s*\)[^;]*;?/gi, '');
-  }
 
   // ===== CSS Injection =====
 

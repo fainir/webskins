@@ -39,9 +39,15 @@ export async function getSkinDetails(id) {
 }
 
 export async function publishSkin({ name, description, css, domain, prompt, authorName, authorId, thumbnail }) {
+  const token=btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
+  const nonce=crypto.randomUUID();
+  const before=await chrome.storage.local.get('webskins_pending_publications');
+  const pending={...(before.webskins_pending_publications??{}),[nonce]:{key:token,name,domain,at:Date.now()}};
+  // Retain the private key before making the publication irreversible on the server.
+  await chrome.storage.local.set({webskins_pending_publications:pending});
   const res = await fetch(`${getBaseUrl()}/api/skins`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type':'application/json',Authorization:`Bearer ${token}`,'X-WebSkins-Key-Storage':'1' },
     body: JSON.stringify({ name, description, css, domain, prompt, authorName, authorId, thumbnail }),
   });
 
@@ -50,7 +56,11 @@ export async function publishSkin({ name, description, css, domain, prompt, auth
     throw new Error(err.error || 'Failed to publish');
   }
 
-  return res.json();
+  const skin=await res.json();
+  const stored=await chrome.storage.local.get(['webskins_management_keys','webskins_pending_publications']);
+  const remaining={...(stored.webskins_pending_publications??{})};delete remaining[nonce];
+  await chrome.storage.local.set({webskins_management_keys:{...(stored.webskins_management_keys??{}),[skin.id]:token},webskins_pending_publications:remaining});
+  return skin;
 }
 
 export async function installSkin(id) {
@@ -65,11 +75,13 @@ export async function likeSkin(id) {
   return res.json();
 }
 
-export async function deleteSkin(id, authorId) {
+export async function deleteSkin(id) {
+  const stored=await chrome.storage.local.get('webskins_management_keys');
+  const token=stored.webskins_management_keys?.[id];
+  if(!token) throw new Error('This installation has no private management key for that skin');
   const res = await fetch(`${getBaseUrl()}/api/skins/${id}`, {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ authorId }),
+    headers: {Authorization:`Bearer ${token}`},
   });
   if (!res.ok) throw new Error('Failed to delete');
   return res.json();

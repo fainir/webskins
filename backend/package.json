@@ -9,12 +9,20 @@
     "db:push": "npx prisma db push",
     "db:generate": "npx prisma generate",
     "db:studio": "npx prisma studio",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test": "node --experimental-sqlite --test test/*.test.js"
   },
   "dependencies": {
     "@prisma/client": "^6.4.1",
     "cors": "^2.8.5",
+    "css-tree": "3.2.1",
     "express": "^4.21.0",
     "prisma": "^6.4.1"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.0"
   }
 }

@@ -1,3 +1,4 @@
+import {aiConsent,recordAiConsent,requireAiConsent} from './utils/privacy.js';
 // WebSkins Background Service Worker
 // Handles Claude API calls, screenshot capture, and orchestration
 
@@ -13,6 +14,7 @@ const MIN_QUALITY = 8;   // Keep improving until this quality
 const MAX_CYCLES = 4;    // Hard cap on evaluation cycles
 
 const activeAbortControllers = new Map();
+const activePageContexts = new Map();
 
 // ===== Message Handler =====
 
@@ -24,12 +26,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function handleMessage(message, sender) {
+  if(sender.id!==chrome.runtime.id||!sender.url?.startsWith(chrome.runtime.getURL('')))throw new Error('Use the WebSkins controls');
   switch (message.action) {
+    case 'get-ai-consent': return aiConsent(message.tabId);
+    case 'record-ai-consent': return recordAiConsent(message.tabId);
     case 'generate-skin':
-      return handleGenerate(message);
-
-    case 'chat-refine':
-      return handleChatRefine(message);
+    case 'chat-refine': {
+      const context=await requireAiConsent(message.tabId);
+      if(activePageContexts.has(message.tabId))throw new Error('Generation is already running');
+      activePageContexts.set(message.tabId,context);
+      try{return message.action==='generate-skin'?await handleGenerate(message):await handleChatRefine(message);}
+      finally{activePageContexts.delete(message.tabId);}
+    }
 
     case 'apply-skin':
       return handleApplySkin(message);
@@ -346,6 +354,8 @@ async function handleGetState({ domain }) {
 // ===== Helpers =====
 
 async function sendToTab(tabId, message) {
+  const context=activePageContexts.get(tabId);
+  if(context&&(await chrome.tabs.get(tabId)).url!==context.url)throw new Error('The page changed; start again on the intended page');
   try {
     return await chrome.tabs.sendMessage(tabId, message);
   } catch {
@@ -355,7 +365,13 @@ async function sendToTab(tabId, message) {
 
 async function captureScreenshot(tabId) {
   const tab = await chrome.tabs.get(tabId);
+  const context=activePageContexts.get(tabId);
+  if(!context||tab.url!==context.url)throw new Error('The page changed');
+  const [active]=await chrome.tabs.query({active:true,windowId:tab.windowId});
+  if(active?.id!==tabId)throw new Error('Keep the intended tab active for visual review');
   const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' });
+  const [after]=await chrome.tabs.query({active:true,windowId:tab.windowId});
+  if(after?.id!==tabId||(await chrome.tabs.get(tabId)).url!==context.url)throw new Error('The active page changed during capture');
   return dataUrl.split(',')[1];
 }
 

@@ -1,7 +1,10 @@
 import { Router } from 'express';
+import crypto from 'node:crypto';
+import {actorFor,dayNow,publicationAllowed,recordCounter} from '../limits.js';
+import {sanitizeCss} from '../css-safety.js';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 export const skinsRouter = Router();
 
 // Browse marketplace skins (with pagination, filtering, search)
@@ -15,8 +18,9 @@ skinsRouter.get('/', async (req, res) => {
       limit = '20',
     } = req.query;
 
-    const take = Math.min(parseInt(limit) || 20, 50);
-    const skip = (Math.max(parseInt(page) || 1, 1) - 1) * take;
+    const take = Math.max(1,Math.min(parseInt(limit) || 20, 50));
+    if((domain && (typeof domain!=="string"||domain.length>255))||(search && (typeof search!=="string"||search.length>200)))return res.status(400).json({error:"Invalid filter"});
+    const skip = (Math.min(1000,Math.max(parseInt(page) || 1, 1)) - 1) * take;
 
     const where = {};
     if (domain) where.domain = domain;
@@ -88,7 +92,8 @@ skinsRouter.get('/:id', async (req, res) => {
 
     if (!skin) return res.status(404).json({ error: 'Skin not found' });
 
-    res.json(skin);
+    const {manageKeyHash, ...visible}=skin;
+    res.json({...visible,css:sanitizeCss(visible.css)});
   } catch (err) {
     console.error('GET /api/skins/:id error:', err);
     res.status(500).json({ error: 'Failed to fetch skin' });
@@ -98,17 +103,34 @@ skinsRouter.get('/:id', async (req, res) => {
 // Publish a skin to the marketplace
 skinsRouter.post('/', async (req, res) => {
   try {
+    if(req.get('x-webskins-key-storage')!=='1')return res.status(426).json({error:'Update WebSkins before publishing so your private management key is retained'});
+    const manageKey=/^Bearer ([A-Za-z0-9_-]{43})$/.exec(req.get('authorization')??'')?.[1];
+    if(!manageKey)return res.status(401).json({error:'Private skin management key required'});
     const { name, description, css, domain, prompt, authorName, authorId, thumbnail } = req.body;
 
     if (!name || !css || !domain || !authorName || !authorId) {
       return res.status(400).json({ error: 'Missing required fields: name, css, domain, authorName, authorId' });
     }
 
-    const skin = await prisma.skin.create({
+    if ([name,css,domain,authorName,authorId].some(v=>typeof v!=='string') ||
+      name.length>120 || authorName.length>120 || authorId.length>120 || domain.length>255 ||
+      Buffer.byteLength(css)>100000 || (description && (typeof description!=='string'||description.length>2000)) ||
+      (prompt && (typeof prompt!=='string'||prompt.length>5000)) ||
+      (thumbnail && (typeof thumbnail!=='string'||thumbnail.length>100000||!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(thumbnail)))) {
+      return res.status(400).json({error:'Skin fields exceed the supported sizes or format'});
+    }
+    const safeCss=sanitizeCss(css);
+    if(!safeCss) return res.status(400).json({error:'No supported local CSS remains'});
+    const manageKeyHash=crypto.createHash('sha256').update(manageKey).digest('hex');
+    const actor=actorFor(req),day=dayNow();
+    const skin=await prisma.$transaction(async tx=>{
+    if(!await publicationAllowed(tx,actor,day))return null;
+    const created=await tx.skin.create({
       data: {
         name,
         description: description || null,
-        css,
+        css:safeCss,
+        manageKeyHash,
         domain,
         prompt: prompt || null,
         authorName,
@@ -117,7 +139,12 @@ skinsRouter.post('/', async (req, res) => {
       },
     });
 
-    res.status(201).json(skin);
+    await tx.metric.create({data:{skinId:created.id,kind:'publish',actor,day}});
+    return created;
+    });
+    if(!skin)return res.status(429).json({error:'Publication or storage limit reached'});
+    const {manageKeyHash: omitted, ...visible}=skin;
+    res.status(201).json(visible);
   } catch (err) {
     console.error('POST /api/skins error:', err);
     res.status(500).json({ error: 'Failed to publish skin' });
@@ -127,12 +154,14 @@ skinsRouter.post('/', async (req, res) => {
 // Delete a skin (only by author)
 skinsRouter.delete('/:id', async (req, res) => {
   try {
-    const { authorId } = req.body;
-    if (!authorId) return res.status(400).json({ error: 'authorId required' });
+    const token=/^Bearer ([A-Za-z0-9_-]{43})$/.exec(req.get('authorization')??'')?.[1];
+    if(!token) return res.status(401).json({error:'Private skin management key required'});
 
     const skin = await prisma.skin.findUnique({ where: { id: req.params.id } });
     if (!skin) return res.status(404).json({ error: 'Skin not found' });
-    if (skin.authorId !== authorId) return res.status(403).json({ error: 'Not authorized' });
+    if(!skin.manageKeyHash) return res.status(409).json({error:'Legacy skin ownership needs operator review'});
+    const digest=crypto.createHash('sha256').update(token).digest('hex');
+    if(!crypto.timingSafeEqual(Buffer.from(skin.manageKeyHash,'hex'),Buffer.from(digest,'hex'))) return res.status(403).json({error:'Not authorized'});
 
     await prisma.skin.delete({ where: { id: req.params.id } });
     res.json({ success: true });
@@ -142,36 +171,18 @@ skinsRouter.delete('/:id', async (req, res) => {
   }
 });
 
-// Like a skin
-skinsRouter.post('/:id/like', async (req, res) => {
+// Counts are per network/day; public IDs are never proof of a unique voter.
+skinsRouter.post('/:id/like', async (req,res)=>{
   try {
-    const skin = await prisma.skin.update({
-      where: { id: req.params.id },
-      data: { likes: { increment: 1 } },
-      select: { id: true, likes: true },
-    });
-
-    res.json(skin);
-  } catch (err) {
-    if (err.code === 'P2025') return res.status(404).json({ error: 'Skin not found' });
-    console.error('POST /api/skins/:id/like error:', err);
-    res.status(500).json({ error: 'Failed to like skin' });
-  }
+    const skin=await recordCounter(prisma,req.params.id,'like',actorFor(req));
+    if(!skin)return res.status(404).json({error:'Skin not found'});
+    res.json({id:skin.id,likes:skin.likes});
+  } catch {res.status(503).json({error:'Like could not be recorded'});}
 });
-
-// Track install
-skinsRouter.post('/:id/install', async (req, res) => {
+skinsRouter.post('/:id/install', async (req,res)=>{
   try {
-    const skin = await prisma.skin.update({
-      where: { id: req.params.id },
-      data: { installs: { increment: 1 } },
-      select: { id: true, installs: true, css: true, name: true, domain: true },
-    });
-
-    res.json(skin);
-  } catch (err) {
-    if (err.code === 'P2025') return res.status(404).json({ error: 'Skin not found' });
-    console.error('POST /api/skins/:id/install error:', err);
-    res.status(500).json({ error: 'Failed to install skin' });
-  }
+    const skin=await recordCounter(prisma,req.params.id,'install',actorFor(req));
+    if(!skin)return res.status(404).json({error:'Skin not found'});
+    res.json({id:skin.id,installs:skin.installs,css:sanitizeCss(skin.css),name:skin.name,domain:skin.domain});
+  } catch {res.status(503).json({error:'Install could not be recorded'});}
 });

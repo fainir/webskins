@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "WebSkins",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "AI-powered website skin generator. Transform any website's look with natural language.",
   "permissions": [
     "storage",
@@ -25,8 +25,13 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["content.js"],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],

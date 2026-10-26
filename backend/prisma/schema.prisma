@@ -2,6 +2,17 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Metric {
+  id String @id @default(cuid())
+  skinId String
+  kind String
+  actor String
+  day String
+  @@unique([skinId,kind,actor,day])
+  @@index([actor,kind,day])
+  @@index([day])
+}
+
 datasource db {
   // A SQLite file on the service volume: the marketplace is one small table.
   provider = "sqlite"
@@ -17,6 +28,7 @@ model Skin {
   prompt      String?
   authorName  String
   authorId    String   // anonymous fingerprint from extension
+  manageKeyHash String? // private capability hash; never returned by public reads
   thumbnail   String?
   likes       Int      @default(0)
   installs    Int      @default(0)

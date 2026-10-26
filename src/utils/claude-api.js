@@ -49,9 +49,7 @@ CRITICAL CSS RULES — follow these exactly:
 
 9. DARK THEMES: If making a dark theme, you MUST override backgrounds on EVERY container — not just body. Modern sites have explicit backgrounds on divs, cards, modals, dropdowns, tooltips, etc. Miss one and you get white-on-white text.
 
-10. CONSISTENCY: Use CSS custom properties at the top of your CSS for theme colors:
-    \`:root { --ws-bg: #1a1a2e; --ws-text: #eee; --ws-accent: #e94560; ... }\`
-    Then reference them: \`background: var(--ws-bg) !important;\``;
+10. LOCAL STYLES ONLY: Use literal colors and sizes consistently. Do not use CSS custom properties, var(), url(), @import, image-set(), @font-face or external resources. Use system-ui, sans-serif or monospace fonts. These constructs are removed by the safety filter.`;
 
 const EVALUATION_PROMPT = `You are a meticulous visual QA reviewer for a website skin. You can see a screenshot of the result AND the page's DOM structure.
 
