@@ -107,7 +107,7 @@ async function handleGenerate({ tabId, prompt }) {
   const domain = domainData.domain;
 
   // Notify popup: starting
-  broadcastProgress(tabId, { stage: 'generating', cycle: 1, totalCycles: '?', message: 'Designing your skin with Opus...' });
+  broadcastProgress(tabId, { stage: 'generating', cycle: 1, totalCycles: '?', message: 'Designing your skin...' });
 
   // Cycle 1: Generate initial skin from prompt + DOM
   const result = await generateSkin(apiKey, model, pageStructure, prompt, null, signal);

@@ -184,7 +184,7 @@ async function callClaude(apiKey, model, systemPrompt, messages, signal) {
     messages,
     // Claude 5.5 models decide how much to think; a fixed thinking budget is rejected.
     thinking: { type: 'adaptive' },
-    output_config: { effort: 'high' },
+    output_config: { effort: model === 'claude-opus-5-5' ? 'high' : 'medium' },
   };
 
   const response = await fetch(API_URL, {
@@ -205,6 +205,9 @@ async function callClaude(apiKey, model, systemPrompt, messages, signal) {
   }
 
   const data = await response.json();
+  if (data.stop_reason !== 'end_turn') {
+    throw new Error('The design response was incomplete. Try a smaller change or generate again.');
+  }
 
   // With extended thinking, find the text block (not the thinking block)
   let text = '';
