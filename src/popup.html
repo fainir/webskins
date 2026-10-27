@@ -50,10 +50,11 @@
       <div class="bg-surface-container-low rounded-xl p-2.5 flex gap-2 items-center">
         <input id="api-key-input" class="flex-1 bg-transparent border-none text-xs focus:ring-0 focus:outline-none placeholder:text-on-surface-variant/50 font-medium px-1" placeholder="API Key" type="password" aria-label="API Key">
         <button id="btn-save-key" class="bg-surface-container-lowest text-primary text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm hover:bg-white active:scale-95 transition-all">
-          SAVE
+          USE KEY
         </button>
       </div>
       <p id="api-key-status" class="text-[9px] text-on-surface-variant mt-1 px-1 hidden"></p>
+      <p class="text-[9px] text-on-surface-variant mt-1 px-1">Key stays in memory for this Chrome session. Re-enter it after restarting Chrome.</p>
     </section>
 
     <!-- Generate Section -->
@@ -144,9 +145,11 @@
         <label class="text-[10px] font-bold text-on-surface-variant tracking-wide block mb-1.5">API KEY</label>
         <div class="bg-surface-container-low rounded-xl p-2.5 flex gap-2 items-center">
           <input id="settings-api-key" class="w-full bg-transparent border-none text-xs focus:ring-0 focus:outline-none placeholder:text-on-surface-variant/50 font-medium px-1" placeholder="sk-ant-..." type="password" aria-label="Settings API Key">
-          <button id="btn-settings-save-key" class="bg-surface-container-lowest text-primary text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm hover:bg-white active:scale-95 transition-all">SAVE</button>
+          <button id="btn-settings-save-key" class="bg-surface-container-lowest text-primary text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm hover:bg-white active:scale-95 transition-all">USE KEY</button>
         </div>
         <p id="settings-key-status" class="text-[9px] text-on-surface-variant mt-1 px-1"></p>
+        <p class="text-[9px] text-on-surface-variant mt-1 px-1">Key stays in memory for this Chrome session. Re-enter it after restarting Chrome.</p>
+        <button id="btn-settings-remove-key" class="text-xs py-2 text-error">Remove API key</button>
       </div>
       <div class="mb-5">
         <label class="text-[10px] font-bold text-on-surface-variant tracking-wide block mb-1.5">AI MODEL</label>
@@ -166,8 +169,9 @@
       </div>
       <p class="text-xs px-1 mb-3">AI sends page text/layout and visual-review screenshots to Anthropic using your paid API key, up to five requests per generation or refinement. Local skins use system fonts; resource URLs and CSS variables are removed.</p>
       <button id="btn-revoke-ai-access" class="w-full text-xs py-2">Revoke AI page access</button>
+      <p class="text-center text-xs py-2"><a href="https://webskins-api-production.up.railway.app/privacy" target="_blank" rel="noopener noreferrer">Privacy policy</a></p>
       <div class="text-center py-3">
-        <p class="text-[9px] text-on-surface-variant">WebSkins v1.0.3 — Powered by Claude AI</p>
+        <p class="text-[9px] text-on-surface-variant">WebSkins v1.0.4 — Powered by Claude AI</p>
       </div>
     </div>
   </main>

@@ -23,6 +23,9 @@ test('isolated marketplace ownership, counters, readiness and restore',async()=>
  let child;
  try{
   assert.equal((await call('/health')).status,200);
+  const privacy=await fetch(base+'/privacy');assert.equal(privacy.status,200);
+  const policy=await privacy.text();assert.match(policy,/session-only/);assert.match(policy,/Anthropic/);
+  assert.match(policy,/HMAC/);assert.match(policy,/private management key/);
   const keyOne=crypto.randomBytes(32).toString('base64url'),keyTwo=crypto.randomBytes(32).toString('base64url');
   const first=await call('/api/skins','POST',input('First'),keyOne);
   const second=await call('/api/skins','POST',input('Second'),keyTwo);

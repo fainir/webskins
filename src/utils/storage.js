@@ -9,12 +9,36 @@ const KEYS = {
 };
 
 export async function getApiKey() {
-  const result = await chrome.storage.local.get(KEYS.API_KEY);
-  return result[KEYS.API_KEY] || null;
+  const session = keySession();
+  const current = (await session.get(KEYS.API_KEY))[KEYS.API_KEY];
+  const legacy = (await chrome.storage.local.get(KEYS.API_KEY))[KEYS.API_KEY];
+  if (legacy) {
+    await setApiKey(legacy);
+    return legacy;
+  }
+  return current || null;
+}
+
+function keySession() {
+  if (!chrome.storage.session) throw new Error('Update Chrome to use session-only API key storage');
+  return chrome.storage.session;
 }
 
 export async function setApiKey(key) {
-  await chrome.storage.local.set({ [KEYS.API_KEY]: key });
+  const session = keySession();
+  if (typeof key !== 'string' || !key.trim()) throw new Error('Enter an API key');
+  await session.setAccessLevel({accessLevel:'TRUSTED_CONTEXTS'});
+  await session.set({ [KEYS.API_KEY]: key.trim() });
+  if ((await session.get(KEYS.API_KEY))[KEYS.API_KEY] !== key.trim()) {
+    throw new Error('API key could not be retained for this browser session; existing local settings were preserved');
+  }
+  // Delete a legacy plaintext key only after the session copy is verified.
+  await chrome.storage.local.remove(KEYS.API_KEY);
+}
+
+export async function removeApiKey() {
+  await keySession().remove(KEYS.API_KEY);
+  await chrome.storage.local.remove(KEYS.API_KEY);
 }
 
 // Models the settings menu offers. A saved model that is no longer offered

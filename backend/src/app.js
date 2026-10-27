@@ -3,10 +3,12 @@ import cors from 'cors';
 import {skinsRouter,prisma} from './routes/skins.js';
 import {actorFor} from './limits.js';
 import {backupHealth} from './store.js';
+import {fileURLToPath} from 'node:url';
 
 export function createApp() {
  const app=express(),buckets=new Map();
  app.disable('x-powered-by');app.use(cors());app.use(express.json({limit:'256kb'}));
+ app.get('/privacy',(_req,res)=>res.set('Cache-Control','no-cache').sendFile(fileURLToPath(new URL('../public/privacy.html',import.meta.url))));
  app.get('/health',async(_req,res)=>{
   try{
    if(!process.env.RATE_LIMIT_SECRET)throw new Error('Missing rate configuration');

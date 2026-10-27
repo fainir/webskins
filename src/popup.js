@@ -1,7 +1,7 @@
 import {revokeAiConsent} from './utils/privacy.js';
 // WebSkins Popup — State Management & UI
 import {
-  getApiKey, setApiKey, getModel, setModel,
+  getApiKey, setApiKey, removeApiKey, getModel, setModel,
   getSkinsForDomain,
   setActiveSkin, deleteSkin, clearAllData, saveSkin,
 } from './utils/storage.js';
@@ -49,7 +49,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Load settings
-  state.apiKey = await getApiKey();
+  let keyStorageFailed = false;
+  try {state.apiKey = await getApiKey();}
+  catch {state.apiKey=null;keyStorageFailed=true;}
   state.apiKeySet = !!state.apiKey;
   state.model = await getModel();
 
@@ -60,6 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Setup UI
   setupEventListeners();
   render();
+  if(keyStorageFailed)showKeyStatus('api-key-status','Could not open session key storage. Existing saved settings were preserved. Update Chrome or try again.','error');
 
   // If API key exists, hide the section on home and show status
   if (state.apiKeySet) {
@@ -264,7 +267,7 @@ function renderSettings() {
   const modelSelect = document.getElementById('settings-model');
 
   if (state.apiKey) {
-    const masked = state.apiKey.substring(0, 12) + '...';
+    const masked = '••••••••';
     keyInput.value = masked;
     keyInput.dataset.masked = masked;
   }
@@ -333,6 +336,13 @@ function setupEventListeners() {
   // Settings
   document.getElementById('btn-revoke-ai-access').addEventListener('click',async()=>{await revokeAiConsent();showStatus('AI page access revoked. Next generation asks again.');});
   document.getElementById('btn-settings-save-key').addEventListener('click', handleSettingsSaveKey);
+  document.getElementById('btn-settings-remove-key').addEventListener('click',async()=>{
+    try {
+      await removeApiKey(); state.apiKey=null;state.apiKeySet=false;
+      const input=document.getElementById('settings-api-key');input.value='';delete input.dataset.masked;
+      render();showKeyStatus('settings-key-status','API key removed from this browser.','success');
+    } catch {showKeyStatus('settings-key-status','Could not remove the key. Try again.','error');}
+  });
   document.getElementById('settings-model').addEventListener('change', async (e) => {
     state.model = e.target.value;
     await setModel(state.model);
@@ -361,13 +371,14 @@ async function handleSaveKey() {
     return;
   }
 
-  await setApiKey(key);
+  try {await setApiKey(key);}
+  catch {showKeyStatus('api-key-status','Could not retain the key for this session. Try again.','error');return;}
   state.apiKey = key;
   state.apiKeySet = true;
   input.value = '';
 
   document.getElementById('api-key-section').classList.add('hidden');
-  showStatus('API key saved');
+  showStatus('API key ready for this Chrome session');
 }
 
 async function handleSettingsSaveKey() {
@@ -382,13 +393,14 @@ async function handleSettingsSaveKey() {
   // Ignore if the user hasn't changed the masked placeholder
   if (raw === input.dataset.masked) return;
 
-  await setApiKey(raw);
+  try {await setApiKey(raw);}
+  catch {showKeyStatus('settings-key-status','Could not retain the key for this session. Try again.','error');return;}
   state.apiKey = raw;
   state.apiKeySet = true;
-  const masked = raw.substring(0, 12) + '...';
+  const masked = '••••••••';
   input.value = masked;
   input.dataset.masked = masked;
-  showKeyStatus('settings-key-status', 'Key saved!', 'success');
+  showKeyStatus('settings-key-status', 'Key ready for this Chrome session.', 'success');
 }
 
 let lastGenerateTime = 0;

@@ -1,47 +1,43 @@
 # WebSkins Privacy Policy
 
-**Last updated: March 24, 2026**
+Last updated: October 27, 2026
 
-## Overview
+## Purpose and AI consent
 
-WebSkins is a Chrome extension that generates custom CSS skins for websites using AI. Your privacy is important to us.
+WebSkins changes website appearance with CSS. Applying or removing a saved skin does not require AI. Before AI use on each website origin, WebSkins asks for permission to send visible page text and layout, your design prompt, and visual-review screenshots to Anthropic. Those captures may include private messages, photos or other information visible on the page. Settings can revoke this page access. Each generation or refinement can make up to five paid requests using your Anthropic account.
 
-## Data Collection
+## Anthropic API key
 
-WebSkins collects and processes the following data:
+Starting with version 1.0.4, the API key uses session-only Chrome storage restricted to trusted extension contexts. It is kept in memory for the current browser session, rather than intentionally written to persistent extension storage. You must enter it again after Chrome restarts. The Remove API key control clears the extension's copy; it does not revoke the key at Anthropic.
 
-- **Website content**: The extension reads the current page's HTML structure (DOM) to provide context for AI-powered CSS generation. This data is sent to the Anthropic Claude API using your personal API key and is not stored by WebSkins.
-- **Screenshots**: The extension captures screenshots of the active tab to evaluate and improve generated skins. Screenshots are sent to the Claude API and are not stored by WebSkins.
-- **API Key**: Your Claude API key is stored locally in Chrome's storage on your device. It is never sent to any server other than Anthropic's API.
-- **Saved skins**: Generated CSS skins are stored locally in Chrome's storage on your device.
-- **Published skins**: If you choose to publish a skin to the community marketplace, the skin's CSS, name, description, target domain, and your chosen display name are sent to our marketplace server.
+Earlier versions stored the key in Chrome local extension storage. When version 1.0.4 first loads the key, it migrates that value into session storage and removes the local copy only after verifying the session copy. If migration fails, it preserves the original value and does not return it for an AI request. Removing the key clears both copies.
 
-## Data Usage
+Your key is sent directly to Anthropic to authenticate your requests. It is not sent to the WebSkins marketplace server. Anthropic's own data-handling policies apply to the prompts, page captures and screenshots it receives.
 
-- Website content and screenshots are used solely to generate and improve CSS skins via the Claude API.
-- No user data is sold or transferred to third parties.
-- No user data is used for advertising, analytics, or tracking purposes.
-- No personally identifiable information is collected unless you voluntarily provide a display name when publishing to the marketplace.
+## Data on your device
 
-## Third-Party Services
+Chrome local extension storage retains your model and skin preferences, saved CSS skins, design prompts and chat history, per-origin consent choices, marketplace votes, a random author identifier, and private publication-management keys. Saved local data is not a secure vault. Protect access to your browser profile. Raw captured page layout and screenshots are used during AI processing; WebSkins does not intentionally save those raw captures as a local history.
 
-- **Anthropic Claude API**: Website content and screenshots are sent to Anthropic's API for CSS generation. This is done using your personal API key, and Anthropic's privacy policy applies to that data.
-- **WebSkins Marketplace API**: Only data you explicitly choose to publish (skin CSS, name, description, domain) is sent to our marketplace server.
+## Public marketplace
 
-## Data Storage
+Publishing is optional and has a separate confirmation. A published skin can expose its name, description, CSS, prompt, target domain, chosen display name and author identifier. If a thumbnail is supplied, that image is also uploaded. Do not publish private page details or confidential prompts.
 
-- All user data (API key, skins, preferences) is stored locally on your device using Chrome's built-in storage API.
-- No data is stored on external servers unless you explicitly publish a skin to the community marketplace.
+The marketplace receives a private management key for each publication and retains only its hash for ownership verification. The extension keeps the private management key locally. A public author ID or display name does not prove ownership. Older publications without this proof require independent operator review for removal.
 
-## Data Deletion
+## Network information and retention
 
-- Uninstalling the extension removes all locally stored data.
-- To delete a published skin from the marketplace, contact us at fainir2006@gmail.com.
+Marketplace requests include the network information needed to handle an HTTP request. The server uses secret-keyed HMAC network identifiers for abuse prevention, daily quotas and deduplicated like/install counts. Old metric rows are pruned after 90 days when the service starts. Counts are usage metrics, not verified unique people.
 
-## Changes
+Publications remain on the marketplace until removed. The service retains up to seven verified recovery copies; recent data may remain in those backups until they rotate out. Operators must review removals when recovering a backup. Hosting infrastructure and Anthropic have their own data-handling policies. WebSkins does not sell user data or use page captures for advertising.
 
-We may update this privacy policy from time to time. Changes will be reflected in the "Last updated" date above.
+## Removal and control
 
-## Contact
+Clear All Skins removes local saved skins and active-skin selections. It does not unpublish marketplace copies or remove your API key, consent settings or private publication keys. Revoke AI page access clears the origin approvals. Remove API key clears the locally held API credential.
 
-For questions about this privacy policy, contact: fainir2006@gmail.com
+Uninstalling the extension removes its local Chrome storage, including private publication keys. It does not remove public marketplace records or copies saved by other users. A publication can be removed through the marketplace API with its private management key. Contact support for help; requests without that key require independent ownership verification. Never send API keys or private management keys in email or public issues.
+
+## Contact and limited use
+
+Questions and data-removal requests: fainir2006@gmail.com.
+
+WebSkins limits its handling of user data to the appearance-generation, local skin-management and optional marketplace features described here. Its use of information received from Google APIs adheres to the Chrome Web Store User Data Policy, including the Limited Use requirements.

@@ -1,6 +1,6 @@
 # WebSkins release and recovery
 
-The readiness source targets Node24 and extension1.0.3. Build the extension with `npm ci`,
+The readiness source targets Node24 and extension1.0.4. Build the extension with `npm ci`,
 `npm test`, and `npm run build`. Load/package only `dist`, which contains no backend environment
 files, database, management keys or local user data. Chrome Web Store publication and an actual
 installed-extension check are separate release steps; a fixture is not evidence of that check.
@@ -58,3 +58,5 @@ private ownership survives it using disposable synthetic rows only.
 New generation defaults to Claude Sonnet 5.5 for balanced CSS/design quality and cost. Claude Opus 5.5 remains an explicit advanced option. Retired or unknown saved model IDs resolve to the current Sonnet default before a provider request; API keys, saved skins and explicit current model choices are retained.
 
 Sonnet5.5 uses medium reasoning effort for the balanced design option; explicit Opus5.5 uses high effort. The wrapper rejects token-limited, refused or otherwise incomplete responses before parsing or applying CSS. A real synthetic Sonnet5.5 check returned local-only, sanitized CSS with body, button, input and focus coverage in18 seconds (1252input/2093output tokens, about$0.0234 at standard base token rates). This is provider-wrapper evidence, not an installed-extension test.
+
+Version1.0.4 keeps the Anthropic key only in trusted-context Chrome session storage; restarting Chrome requires the key again. Legacy local keys migrate only after a verified session write. Settings provides key removal. The public policy is at https://webskins-api-production.up.railway.app/privacy and must be linked in the Store privacy field. Actual installed-extension and Store review remain separate pending checks.
