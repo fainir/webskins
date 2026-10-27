@@ -1,7 +1,6 @@
-import {revokeAiConsent} from './utils/privacy.js';
 // WebSkins Popup — State Management & UI
 import {
-  getApiKey, setApiKey, removeApiKey, getModel, setModel,
+  getApiKey, setApiKey, getModel, setModel,
   getSkinsForDomain,
   setActiveSkin, deleteSkin, clearAllData, saveSkin,
 } from './utils/storage.js';
@@ -334,11 +333,18 @@ function setupEventListeners() {
   });
 
   // Settings
-  document.getElementById('btn-revoke-ai-access').addEventListener('click',async()=>{await revokeAiConsent();showStatus('AI page access revoked. Next generation asks again.');});
+  document.getElementById('btn-revoke-ai-access').addEventListener('click',async()=>{
+    try {const result=await chrome.runtime.sendMessage({action:'revoke-ai-access'});
+      if(result?.error)throw new Error('Revocation failed');
+      showStatus('AI page access revoked and generation stopped. Next generation asks again.');
+    }catch{showStatus('Could not revoke AI access. Try again.','error');}
+  });
   document.getElementById('btn-settings-save-key').addEventListener('click', handleSettingsSaveKey);
   document.getElementById('btn-settings-remove-key').addEventListener('click',async()=>{
     try {
-      await removeApiKey(); state.apiKey=null;state.apiKeySet=false;
+      const result=await chrome.runtime.sendMessage({action:'remove-api-key'});
+      if(result?.error)throw new Error('Key removal failed');
+      state.apiKey=null;state.apiKeySet=false;document.getElementById('api-key-input').value='';
       const input=document.getElementById('settings-api-key');input.value='';delete input.dataset.masked;
       render();showKeyStatus('settings-key-status','API key removed from this browser.','success');
     } catch {showKeyStatus('settings-key-status','Could not remove the key. Try again.','error');}
@@ -409,7 +415,7 @@ async function ensureAiConsent() {
   const context=await chrome.runtime.sendMessage({action:'get-ai-consent',tabId:state.tabId});
   if(context.error){showStatus(context.error,'error');return false;}
   if(context.granted)return true;
-  const approved=confirm(`Allow AI styling on ${context.origin}?\n\nVisible page text and layout, your prompt, and up to four screenshots will be sent to Anthropic using ${state.model}. They can include private messages, photos or other information visible on the page.\n\nEach generation or refinement can make up to five paid API requests charged to your Anthropic account. Keep this tab active during visual reviews.\n\nAllow for this site? You can revoke access in Settings.`);
+  const approved=confirm(`Allow AI styling on ${context.origin}?\n\nRendered page text and layout (including content outside the viewport), your prompt, and up to four screenshots will be sent to Anthropic using ${state.model}. They can include private messages, photos or other information visible on the page.\n\nEach generation or refinement can make up to five paid API requests charged to your Anthropic account. Keep this tab active during visual reviews.\n\nAllow for this site? You can revoke access in Settings.`);
   if(!approved)return false;
   const result=await chrome.runtime.sendMessage({action:'record-ai-consent',tabId:state.tabId});
   if(result.error){showStatus(result.error,'error');return false;}

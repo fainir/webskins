@@ -137,7 +137,7 @@ Review the screenshot above. Find EVERY visual issue and produce an improved, CO
   return callClaude(apiKey, model, EVALUATION_PROMPT, messages, signal);
 }
 
-export async function chatRefine(apiKey, model, pageStructure, chatHistory, newMessage) {
+export async function chatRefine(apiKey, model, pageStructure, chatHistory, newMessage, signal) {
   const messages = [];
 
   // Build conversation from history — skip system messages and the last user message
@@ -173,7 +173,7 @@ export async function chatRefine(apiKey, model, pageStructure, chatHistory, newM
     content: `Page structure:\n${pageStructure}\n\nUser request: ${newMessage}\n\nProvide COMPLETE updated CSS (not just the diff). Use !important on every property.`,
   });
 
-  return callClaude(apiKey, model, SYSTEM_PROMPT, messages);
+  return callClaude(apiKey, model, SYSTEM_PROMPT, messages, signal);
 }
 
 async function callClaude(apiKey, model, systemPrompt, messages, signal) {

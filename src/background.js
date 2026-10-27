@@ -1,10 +1,10 @@
-import {aiConsent,recordAiConsent,requireAiConsent} from './utils/privacy.js';
+import {aiConsent,recordAiConsent,requireAiConsent,revokeAiConsent} from './utils/privacy.js';
 // WebSkins Background Service Worker
 // Handles Claude API calls, screenshot capture, and orchestration
 
 import { generateSkin, evaluateSkin, chatRefine } from './utils/claude-api.js';
 import {
-  getApiKey, getModel,
+  getApiKey, getModel, removeApiKey,
   saveSkin, setActiveSkin, getActiveSkin, getSkinsForDomain,
   generateId,
 } from './utils/storage.js';
@@ -28,15 +28,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 async function handleMessage(message, sender) {
   if(sender.id!==chrome.runtime.id||!sender.url?.startsWith(chrome.runtime.getURL('')))throw new Error('Use the WebSkins controls');
   switch (message.action) {
+    case 'remove-api-key':
+    case 'revoke-ai-access': {
+      for (const controller of activeAbortControllers.values()) controller.abort();
+      if(message.action==='remove-api-key')await removeApiKey();
+      else await revokeAiConsent();
+      return {success:true};
+    }
     case 'get-ai-consent': return aiConsent(message.tabId);
     case 'record-ai-consent': return recordAiConsent(message.tabId);
     case 'generate-skin':
     case 'chat-refine': {
       const context=await requireAiConsent(message.tabId);
       if(activePageContexts.has(message.tabId))throw new Error('Generation is already running');
+      const controller=new AbortController();
+      activeAbortControllers.set(message.tabId,controller);
       activePageContexts.set(message.tabId,context);
-      try{return message.action==='generate-skin'?await handleGenerate(message):await handleChatRefine(message);}
-      finally{activePageContexts.delete(message.tabId);}
+      const request={...message,signal:controller.signal};
+      try{return message.action==='generate-skin'?await handleGenerate(request):await handleChatRefine(request);}
+      finally{activePageContexts.delete(message.tabId);activeAbortControllers.delete(message.tabId);}
     }
 
     case 'apply-skin':
@@ -65,7 +75,6 @@ async function handleCancelGeneration({ tabId }) {
   const controller = activeAbortControllers.get(tabId);
   if (controller) {
     controller.abort();
-    activeAbortControllers.delete(tabId);
   }
   return { success: true };
 }
@@ -84,17 +93,13 @@ function friendlyError(err) {
 
 // ===== Generate Skin (Multi-Cycle) =====
 
-async function handleGenerate({ tabId, prompt }) {
+async function handleGenerate({ tabId, prompt, signal }) {
   if (!navigator.onLine) throw new Error('You appear to be offline. Please check your connection.');
 
   const apiKey = await getApiKey();
   if (!apiKey) throw new Error('API key not set');
 
   const model = await getModel();
-
-  const controller = new AbortController();
-  activeAbortControllers.set(tabId, controller);
-  const { signal } = controller;
 
   try {
 
@@ -111,6 +116,7 @@ async function handleGenerate({ tabId, prompt }) {
 
   // Cycle 1: Generate initial skin from prompt + DOM
   const result = await generateSkin(apiKey, model, pageStructure, prompt, null, signal);
+  signal.throwIfAborted();
 
   // Apply CSS to page
   await sendToTab(tabId, { action: 'apply-css', css: result.css });
@@ -134,12 +140,14 @@ async function handleGenerate({ tabId, prompt }) {
 
     // Wait for CSS to render before taking screenshot
     await delay(1000);
+    signal.throwIfAborted();
 
     // Take screenshot of current result
     let screenshotBase64;
     try {
       screenshotBase64 = await captureScreenshot(tabId);
     } catch {
+      signal.throwIfAborted();
       break; // Can't capture, stop improving
     }
 
@@ -155,6 +163,7 @@ async function handleGenerate({ tabId, prompt }) {
     try {
       improved = await evaluateSkin(apiKey, model, screenshotBase64, currentCss, prompt, freshStructure, signal);
     } catch (err) {
+      signal.throwIfAborted();
       // Per-cycle error recovery — keep best CSS so far, skip this cycle
       broadcastProgress(tabId, { stage: 'improving', message: `Cycle ${cycleNum} error, keeping current result...` });
       continue;
@@ -207,6 +216,7 @@ async function handleGenerate({ tabId, prompt }) {
   };
 
   // Save and activate
+  signal.throwIfAborted();
   await saveSkin(domain, skin);
   await setActiveSkin(domain, skin.id);
 
@@ -216,14 +226,12 @@ async function handleGenerate({ tabId, prompt }) {
 
   } catch (err) {
     throw new Error(friendlyError(err));
-  } finally {
-    activeAbortControllers.delete(tabId);
   }
 }
 
 // ===== Chat Refine =====
 
-async function handleChatRefine({ tabId, skinId, domain, message: userMessage, chatHistory }) {
+async function handleChatRefine({ tabId, skinId, domain, message: userMessage, chatHistory, signal }) {
   if (!navigator.onLine) throw new Error('You appear to be offline. Please check your connection.');
 
   const apiKey = await getApiKey();
@@ -238,12 +246,13 @@ async function handleChatRefine({ tabId, skinId, domain, message: userMessage, c
 
   let result;
   try {
-    result = await chatRefine(apiKey, model, pageData.structure, chatHistory, userMessage);
+    result = await chatRefine(apiKey, model, pageData.structure, chatHistory, userMessage, signal);
   } catch (err) {
     throw new Error(friendlyError(err));
   }
 
   // Apply initial refined CSS
+  signal.throwIfAborted();
   let currentCss = result.css;
   let currentName = result.name;
   let currentDescription = result.description;
@@ -261,11 +270,13 @@ async function handleChatRefine({ tabId, skinId, domain, message: userMessage, c
     });
 
     await delay(1000);
+    signal.throwIfAborted();
 
     let screenshotBase64;
     try {
       screenshotBase64 = await captureScreenshot(tabId);
     } catch {
+      signal.throwIfAborted();
       break;
     }
 
@@ -277,8 +288,9 @@ async function handleChatRefine({ tabId, skinId, domain, message: userMessage, c
 
     let improved;
     try {
-      improved = await evaluateSkin(apiKey, model, screenshotBase64, currentCss, userMessage, freshStructure);
+      improved = await evaluateSkin(apiKey, model, screenshotBase64, currentCss, userMessage, freshStructure, signal);
     } catch {
+      signal.throwIfAborted();
       broadcastProgress(tabId, { stage: 'improving', message: `Cycle ${cycleNum} error, keeping current...` });
       continue;
     }
@@ -354,8 +366,10 @@ async function handleGetState({ domain }) {
 // ===== Helpers =====
 
 async function sendToTab(tabId, message) {
+  activeAbortControllers.get(tabId)?.signal.throwIfAborted();
   const context=activePageContexts.get(tabId);
   if(context&&(await chrome.tabs.get(tabId)).url!==context.url)throw new Error('The page changed; start again on the intended page');
+  activeAbortControllers.get(tabId)?.signal.throwIfAborted();
   try {
     return await chrome.tabs.sendMessage(tabId, message);
   } catch {
@@ -364,14 +378,17 @@ async function sendToTab(tabId, message) {
 }
 
 async function captureScreenshot(tabId) {
+  activeAbortControllers.get(tabId)?.signal.throwIfAborted();
   const tab = await chrome.tabs.get(tabId);
   const context=activePageContexts.get(tabId);
   if(!context||tab.url!==context.url)throw new Error('The page changed');
   const [active]=await chrome.tabs.query({active:true,windowId:tab.windowId});
   if(active?.id!==tabId)throw new Error('Keep the intended tab active for visual review');
+  activeAbortControllers.get(tabId)?.signal.throwIfAborted();
   const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' });
   const [after]=await chrome.tabs.query({active:true,windowId:tab.windowId});
   if(after?.id!==tabId||(await chrome.tabs.get(tabId)).url!==context.url)throw new Error('The active page changed during capture');
+  activeAbortControllers.get(tabId)?.signal.throwIfAborted();
   return dataUrl.split(',')[1];
 }
 

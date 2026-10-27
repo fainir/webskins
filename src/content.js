@@ -1,3 +1,4 @@
+import {capturePageStructure} from './utils/page-capture.js';
 import {sanitizeCss} from "../backend/src/css-safety.js";
 // WebSkins Content Script
 // Runs on every page — handles CSS injection, DOM capture, and auto-apply
@@ -32,62 +33,6 @@ import {sanitizeCss} from "../backend/src/css-safety.js";
   }
 
   // ===== DOM Capture =====
-
-  function capturePageStructure() {
-    const SKIP_TAGS = new Set([
-      'SCRIPT', 'STYLE', 'NOSCRIPT', 'SVG', 'PATH', 'LINK', 'META',
-      'BR', 'HR', 'WBR', 'IFRAME', 'OBJECT', 'EMBED',
-    ]);
-
-    function processElement(el, depth) {
-      if (depth > 8) return null;
-      if (SKIP_TAGS.has(el.tagName)) return null;
-      if (el.tagName === 'DIV' && el.id === STYLE_ID) return null;
-
-      const tag = el.tagName.toLowerCase();
-      const parts = [tag];
-
-      if (el.id) parts.push(`#${el.id}`);
-      if (el.className && typeof el.className === 'string') {
-        const classes = el.className.trim().split(/\s+/).slice(0, 4).join('.');
-        if (classes) parts.push(`.${classes}`);
-      }
-
-      const selector = parts.join('');
-      const children = [];
-
-      for (const child of el.children) {
-        const processed = processElement(child, depth + 1);
-        if (processed) children.push(processed);
-      }
-
-      // Get direct text content (not from children)
-      let text = '';
-      for (const node of el.childNodes) {
-        if (node.nodeType === 3) {
-          const t = node.textContent.trim();
-          if (t) text += t.substring(0, 40) + ' ';
-        }
-      }
-      text = text.trim();
-
-      // Build output
-      let line = selector;
-      if (text) line += ` "${text.substring(0, 60)}"`;
-
-      if (children.length === 0) return line;
-
-      const indent = '  '.repeat(depth);
-      let result = line + '\n';
-      for (const child of children) {
-        result += indent + '  ' + child + '\n';
-      }
-      return result.trimEnd();
-    }
-
-    const body = processElement(document.body, 0);
-    return body || 'body (empty)';
-  }
 
   // ===== Auto-Apply on Page Load =====
 
@@ -130,7 +75,7 @@ import {sanitizeCss} from "../backend/src/css-safety.js";
         break;
 
       case 'capture-page':
-        sendResponse({ structure: capturePageStructure() });
+        sendResponse({ structure: capturePageStructure(document.body) });
         break;
 
       case 'get-domain':
