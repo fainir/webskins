@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "WebSkins",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minimum_chrome_version": "120",
   "description": "AI-powered website skin generator. Transform any website's look with natural language.",
   "permissions": [

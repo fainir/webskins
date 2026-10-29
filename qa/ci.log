@@ -1,0 +1,152 @@
+CHECK npm ci --ignore-scripts at extension
+
+added 86 packages, and audited 87 packages in 9s
+
+21 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+CHECK npm ci at backend
+
+> webskins-api@1.0.0 postinstall
+> prisma generate
+
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.19.3) to ./node_modules/@prisma/client in 315ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+
+
+added 109 packages, and audited 110 packages in 56s
+
+24 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+CHECK npm test at extension
+
+> webskins@1.0.5 test
+> node --test test/*.test.mjs
+
+✔ malicious CSS cannot retain resources through escaped or indirect syntax (18.546917ms)
+✔ keeps useful local styles, gradients, layout and media rules (2.467208ms)
+✔ rejects oversized and malformed CSS (0.37375ms)
+✔ resolves a skin palette without consulting or changing page variables (2.171375ms)
+✔ bounds repeated palette expansion and rejects indirect resource values (179.177917ms)
+✔ keys remain session-only and are unavailable after a browser restart (4.459125ms)
+✔ a legacy local key is removed only after successful session migration (0.368875ms)
+✔ failed migration preserves the legacy key and never returns it for use (1.211ms)
+✔ explicit removal clears both session and legacy copies without removing saved skins (8.479916ms)
+✔ unsupported browsers fail closed and retain the original key (0.531792ms)
+✔ uses current balanced model for new or retired settings and preserves explicit current choices (4.158375ms)
+✔ capture excludes hidden elements, embedded documents and all form-control text/values (8.459916ms)
+✔ display-contents containers retain rendered descendants while non-rendered nodes are excluded (0.433042ms)
+✔ capture bounds nodes, selector length, depth and total output for large pages (68.034583ms)
+✔ remove-api-key aborts generate-skin and clears the requested data (37.418458ms)
+✔ remove-api-key aborts chat-refine and clears the requested data (8.950333ms)
+✔ revoke-ai-access aborts generate-skin and clears the requested data (10.071833ms)
+✔ revoke-ai-access aborts chat-refine and clears the requested data (13.949209ms)
+✔ unconsented or untrusted callers cannot capture or transmit a private page (16.555208ms)
+✔ balanced and advanced design requests use current supported settings and return completed JSON (145.534458ms)
+✔ a token-limited or refused response cannot become an applied skin even if it contains parseable JSON (8.029709ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1612.951833
+
+CHECK npm test at backend
+
+> webskins-api@1.0.0 test
+> node --experimental-sqlite --test test/*.test.js
+
+(node:96762) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ isolated marketplace ownership, counters, readiness and restore (22277.513333ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 23507.147875
+
+CHECK npm run build at extension
+
+> webskins@1.0.5 build
+> node scripts/build-privacy.js && node scripts/build.js
+
+
+node:fs:440
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open 'PRIVACY.md'
+    at Object.readFileSync (node:fs:440:20)
+    at file:///private/var/folders/nq/ys37nlh54lg0ttt9t84r3r880000gn/T/webskins-ci-_3fk5pzc/scripts/build-privacy.js:4:17
+    at ModuleJob.run (node:internal/modules/esm/module_job:413:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:660:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'PRIVACY.md'
+}
+
+Node.js v24.12.0
+
+CHECK npm ci --ignore-scripts at extension
+
+added 86 packages, and audited 87 packages in 6s
+
+21 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+CHECK npm ci at backend
+
+> webskins-api@1.0.0 postinstall
+> prisma generate
+
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.19.3) to ./node_modules/@prisma/client in 1.77s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+
+added 109 packages, and audited 110 packages in 1m
+
+24 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+CHECK npm run build at extension
+
+> webskins@1.0.5 build
+> node scripts/build-privacy.js && node scripts/build.js
+
+Public privacy page generated from PRIVACY.md
+Building Tailwind CSS...
+Build complete → dist/
+
+CHECK npm audit --omit=dev at extension
+found 0 vulnerabilities
+
+CHECK npm audit --omit=dev at backend
+found 0 vulnerabilities
+
+All source workflow commands passed; accepted installed package unchanged.

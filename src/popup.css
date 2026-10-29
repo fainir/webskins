@@ -3,12 +3,45 @@
 @tailwind utilities;
 
 body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: system-ui, sans-serif;
   width: 400px;
   height: 600px;
   overflow: hidden;
   margin: 0;
+  display: flex;
+  flex-direction: column;
 }
+
+body > header {position: relative !important;flex-shrink: 0;min-height: 44px;}
+body > main {height: auto !important;min-height: 0;flex: 1;padding-top: 0 !important;}
+.font-headline {font-family: system-ui, sans-serif;}
+.icon {width: 1.1em;height: 1.1em;display: inline-block;flex-shrink: 0;}
+button {min-height: 28px;}
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid #3939c7 !important;outline-offset: 3px;
+}
+button:disabled {cursor: not-allowed;}
+input::placeholder, textarea::placeholder {color: #595c5e !important;opacity: 1;}
+#api-key-input {min-width: 0;}
+#settings-api-key {min-width: 0;flex: 1;}
+#btn-save-key, #btn-settings-save-key {flex-shrink: 0;white-space: nowrap;}
+[class*="text-[8px]"], [class*="text-[9px]"], [class*="text-[10px]"] {font-size: 11px;}
+#btn-generate, #btn-chat-send {background: #4647d3;}
+#home-view, #settings-view {scroll-padding: 12px;}
+.feedback {display: flex;align-items: center;gap: 8px;flex-shrink: 0;margin: 0 12px 4px;padding: 8px 10px;border-radius: 10px;background: #eef1f3;color: #2c2f31;font-size: 12px;}
+.feedback.hidden {display: none;}
+.feedback > span {flex: 1;}
+.feedback-error {background: #ffefef;color: #a70138;}
+#btn-dismiss-status {width: 28px;flex-shrink: 0;font-size: 22px;}
+.recovery-panel {margin: 10px 20px;padding: 10px;border: 1px solid #b41340;border-radius: 10px;font-size: 12px;}
+.retry-button {font-size: 12px;font-weight: 700;color: #3939c7;background: #fff;border: 1px solid #4647d3;border-radius: 8px;padding: 6px 10px;margin-top: 8px;}
+dialog {width: 350px;max-width: calc(100% - 32px);padding: 20px;border: 1px solid #747779;border-radius: 16px;color: #2c2f31;background: #f5f7f9;font-size: 13px;}
+dialog::backdrop {background: #2c2f3180;}
+dialog h2 {font-size: 17px;font-weight: 700;margin-bottom: 10px;}
+.dialog-actions {display: flex;justify-content: flex-end;gap: 12px;margin-top: 16px;}
+.dialog-actions button {padding: 6px 12px;font-weight: 700;border: 1px solid #747779;border-radius: 8px;}
+#btn-clear-confirm {background: #b41340;color: white;border-color: #b41340;}
+#clear-error {color: #a70138;margin-top: 8px;}
 
 /* Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
@@ -36,7 +69,7 @@ body {
 
 /* Chat message bubbles */
 .msg-user {
-  background: linear-gradient(135deg, #4647d3, #9396ff);
+  background: #4647d3;
   color: #f4f1ff;
   border-radius: 16px 16px 4px 16px;
 }
@@ -64,11 +97,6 @@ body {
 @keyframes dotPulse {
   0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
   40% { opacity: 1; transform: scale(1); }
-}
-
-/* Skin card hover */
-.skin-card:hover .skin-card-overlay {
-  opacity: 1;
 }
 
 /* Gradient text */

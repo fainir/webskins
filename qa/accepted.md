@@ -1,0 +1,11 @@
+# Retained acceptance - reconciled October29
+
+These are actual completed checks from this release, retained without repeating real provider operations. This document adds no new runtime or Store claim.
+
+- [Actual installed1.0.5 acceptance](/Users/nirfeinstein/Documents/ChatGPT/almost%20finished%20projects%20+%20marketing/artifacts/production-readiness-2026-10-26/webskins-installed-acceptance.json): real generation and refinement, matching installed Settings, apply/save/native reload/remove/restored reload and owner final click independently verified. Temporary QA server/tab cleaned. No key read/exported.
+- [Compiled capture/resource policy](/Users/nirfeinstein/Documents/ChatGPT/almost%20finished%20projects%20+%20marketing/artifacts/production-readiness-2026-10-26/webskins-compiled-1.0.5.json): actual compiled content.js captures bounded rendered content, excludes hidden/form values and strips remote CSS resources.
+- [Candidate checks](/Users/nirfeinstein/Documents/ChatGPT/almost%20finished%20projects%20+%20marketing/artifacts/production-readiness-2026-10-26/webskins-1.0.5-candidate.json):21 extension checks,13 Node24 privacy checks, clean backend restore checks; prior pending installed note is superseded by actual installed acceptance above.
+- [API/privacy public release](/Users/nirfeinstein/Documents/ChatGPT/almost%20finished%20projects%20+%20marketing/artifacts/production-readiness-2026-10-26/webskins-privacy-release-final.json): exact source/privacy/health/backup on existing successful production deployment.
+- [Package/dist parity and public version](/Users/nirfeinstein/Documents/ChatGPT/almost%20finished%20projects%20+%20marketing/artifacts/production-readiness-2026-10-26/webskins-publication-parity-current.json), [accurate Store copy](/Users/nirfeinstein/Documents/ChatGPT/almost%20finished%20projects%20+%20marketing/artifacts/production-readiness-2026-10-26/webskins-store-copy-release.json). All13 accepted dist files match checked1.0.5 ZIP, no permission expansion. Owner submission/public review still pending.
+
+New broad popup UX/CI work has its own rows. This retained proof must not be presented as a new Store submission, a phone web app audit or repeated provider acceptance.
