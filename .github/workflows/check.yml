@@ -1,0 +1,30 @@
+name: Source checks
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      RATE_LIMIT_SECRET: synthetic-ci-only
+      DATABASE_URL: file:/tmp/webskins-ci-unused.db
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm ci --prefix backend
+      - run: npm test
+      - run: npm test --prefix backend
+      - run: npm run build
+      - run: npm audit --omit=dev
+      - run: npm audit --omit=dev --prefix backend
