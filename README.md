@@ -1,12 +1,14 @@
 # WebSkins
 
-A desktop Chrome extension for user-requested CSS appearances, optional community sharing, and a separate marketplace API. The accepted installed candidate is1.0.5; public Store publication still needs the owner. [Readiness](READINESS.md), [retained evidence](qa/accepted.md).
+A desktop Chrome extension for user-requested CSS appearances, optional community sharing, and a separate marketplace API. Installed1.0.5 acceptance is retained. Source1.0.6 is a separate popup recovery/accessibility candidate; public Store publication still needs the owner. [Readiness](READINESS.md), [retained evidence](qa/accepted.md).
 
 ## Develop and check
 
 Use Node24. In a clean checkout: `npm ci --ignore-scripts`, `npm ci --prefix backend`, `npm test`, `npm test --prefix backend`, `npm run build`. The backend test owns a disposable SQLite database and restores its synthetic publication-management key; it never uses production data. CI runs those commands and runtime audits without provider secrets.
 
 `npm run build` replaces dist. Do not run it over the accepted owner's installed dist merely to update documentation. Validate source in an isolated checkout/copy. The already-checked Store ZIP is in the coordinator's prepared upload guide; preserve it until an actual defect requires a new version.
+
+For this popup fix, use `npm run build:candidate` then `npm run package:candidate`. These fixed outputs are `candidate-dist/` and `release/webskins-1.0.6.zip`; they never replace installed dist or the earlier checked ZIP. Run `node qa/popup-ui.mjs` after the candidate build completes for the owned400x600 synthetic popup. It blocks external requests and uses a synthetic Chrome API facade, not an installed extension or real Anthropic call. The local QA module imports the bundled Playwright path on this Mac. [Candidate scope and exact pending upload replacement](qa/store-candidate.md).
 
 ## Existing API service
 
@@ -18,4 +20,4 @@ For code rollback, redeploy the previous successful compatible API deployment, r
 
 ## Extension distribution
 
-The owner uploads the existing1.0.5 ZIP and prepared accurate listing/privacy disclosures in the existing Chrome Store item, then submits for review. No console automation workaround is allowed. Observe the public listing after submission; do not call a local installed candidate publicly distributed. Keep the Store copy/data installed when switching between the accepted unpacked candidate and Store release.
+The existing owner upload action now has a separate1.0.6 replacement candidate described in qa/store-candidate.md. Keep the accepted1.0.5 ZIP as rollback and do not overwrite its installed dist. The owner uses the same existing Chrome Store item and prepared accurate listing/privacy disclosures, then submits for review. No console automation workaround is allowed. Observe the public listing after submission; do not call a local candidate publicly distributed. Keep the Store copy/data installed when switching between an unpacked candidate and Store release.

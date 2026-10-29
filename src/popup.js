@@ -2,7 +2,7 @@
 import {
   getApiKey, setApiKey, getModel, setModel,
   getSkinsForDomain,
-  setActiveSkin, deleteSkin, clearAllData, saveSkin,
+  clearAllData, saveSkin,
 } from './utils/storage.js';
 import {
   fetchTrendingSkins, fetchSkinsByDomain,
@@ -30,13 +30,20 @@ const state = {
   communitySkins: [],
   communitySort: 'trending', // 'trending' | 'newest'
   votedSkins: new Set(),
+  communityLoading: true,
+  communityError: false,
+  localReady: false,
 };
 
 // ===== Init =====
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Get current tab info
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  // Navigation and recovery stay usable even when one storage area is unavailable.
+  setupEventListeners();
+  render();
+  let tab;
+  try {[tab] = await chrome.tabs.query({ active: true, currentWindow: true });}
+  catch {showStatus('Could not read the active tab. Reopen WebSkins on a website.', 'error');}
   if (tab) {
     state.tabId = tab.id;
     try {
@@ -47,31 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Load settings
-  let keyStorageFailed = false;
-  try {state.apiKey = await getApiKey();}
-  catch {state.apiKey=null;keyStorageFailed=true;}
-  state.apiKeySet = !!state.apiKey;
-  state.model = await getModel();
-
-
-  // Load skins for current domain
-  await refreshSkins();
-
-  // Setup UI
-  setupEventListeners();
-  render();
-  if(keyStorageFailed)showKeyStatus('api-key-status','Could not open session key storage. Existing saved settings were preserved. Update Chrome or try again.','error');
-
-  // If API key exists, hide the section on home and show status
-  if (state.apiKeySet) {
-    const section = document.getElementById('api-key-section');
-    section.classList.add('hidden');
-  }
-
-  // Load voted skins from storage
-  const votedResult = await chrome.storage.local.get('webskins_voted');
-  state.votedSkins = new Set(votedResult.webskins_voted || []);
+  await loadLocalState();
 
   // Fetch community skins (non-blocking)
   loadCommunitySkins();
@@ -84,8 +67,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
+async function loadLocalState() {
+  const retry = document.getElementById('btn-retry-storage');
+  retry.disabled = true;
+  retry.textContent = 'Loading…';
+  const results = await Promise.allSettled([
+    getApiKey().then(key => {state.apiKey = key;state.apiKeySet = !!key;}),
+    getModel().then(model => {state.model = model;}),
+    refreshSkins(),
+    chrome.storage.local.get('webskins_voted').then(data => {state.votedSkins = new Set(data.webskins_voted || []);}),
+  ]);
+  state.localReady = results.every(result => result.status === 'fulfilled');
+  document.getElementById('storage-error').classList.toggle('hidden', state.localReady);
+  document.getElementById('api-key-section').classList.toggle('hidden', state.apiKeySet);
+  retry.disabled = false;
+  retry.textContent = 'Retry local storage';
+  render();
+}
+
 async function refreshSkins() {
-  state.skins = await getSkinsForDomain(state.domain);
+  const skins = await getSkinsForDomain(state.domain);
 
   // Check for active skin
   const activeResult = await chrome.storage.local.get('webskins_active');
@@ -93,10 +94,17 @@ async function refreshSkins() {
   const activeSkinId = activeMap[state.domain];
 
   if (activeSkinId) {
-    state.activeSkin = state.skins.find(s => s.id === activeSkinId) || null;
+    state.activeSkin = skins.find(s => s.id === activeSkinId) || null;
   } else {
     state.activeSkin = null;
   }
+  state.skins = skins;
+}
+
+function navigate(view, focusId) {
+  state.view = view;
+  render();
+  document.getElementById(focusId)?.focus();
 }
 
 // ===== Render =====
@@ -132,7 +140,7 @@ function renderHome() {
   const btn = document.getElementById('btn-generate');
   const btnText = document.getElementById('generate-btn-text');
   const cancelBtn = document.getElementById('btn-cancel-generate');
-  btn.disabled = state.isGenerating;
+  btn.disabled = state.isGenerating || !state.localReady;
 
   if (state.isGenerating) {
     btnText.textContent = state.progressMessage || 'Generating...';
@@ -148,7 +156,8 @@ function renderHistory() {
   const list = document.getElementById('history-list');
 
   if (state.skins.length === 0) {
-    section.classList.add('hidden');
+    section.classList.remove('hidden');
+    list.innerHTML = `<p class="text-xs text-on-surface-variant py-2">${state.localReady ? 'No saved skins for this site yet.' : 'Saved skins will appear when local storage is available.'}</p>`;
     return;
   }
 
@@ -158,20 +167,21 @@ function renderHistory() {
   for (const skin of state.skins) {
     const isActive = state.activeSkin?.id === skin.id;
     const card = document.createElement('div');
-    card.className = 'min-w-[120px] snap-start group skin-card cursor-pointer';
+    card.className = 'w-[140px] flex-shrink-0 snap-start skin-card';
     card.innerHTML = `
-      <div class="h-20 w-full rounded-xl mb-1.5 overflow-hidden relative shadow-sm ${isActive ? 'ring-2 ring-primary' : ''}">
+      <button class="skin-open-btn h-20 w-full rounded-xl mb-1.5 overflow-hidden relative shadow-sm ${isActive ? 'ring-2 ring-primary' : ''}" aria-label="Edit ${escapeHtml(skin.name)}">
         <div class="absolute inset-0 ${getGradient(skin.name)}"></div>
-        <div class="skin-card-overlay absolute inset-0 flex items-center justify-center opacity-0 transition-opacity bg-on-background/10 backdrop-blur-sm">
+        <span class="absolute bottom-1.5 left-1.5 rounded bg-white px-2 py-1 text-xs font-bold text-primary">Edit</span>
+      </button>
+      <p class="text-xs font-bold truncate">${escapeHtml(skin.name)}</p>
+      <p class="text-[10px] text-on-surface-variant font-medium mb-1">${timeAgo(skin.createdAt)}</p>
           ${isActive
-      ? '<button class="skin-remove-btn bg-white text-error text-[9px] font-bold px-2.5 py-0.5 rounded-full shadow-lg">REMOVE</button>'
-      : '<button class="skin-apply-btn bg-white text-primary text-[9px] font-bold px-2.5 py-0.5 rounded-full shadow-lg">APPLY</button>'
+      ? '<button class="skin-remove-btn bg-white text-error text-xs font-bold px-3 py-1.5 rounded-lg">Remove</button>'
+      : '<button class="skin-apply-btn bg-white text-primary text-xs font-bold px-3 py-1.5 rounded-lg">Apply</button>'
     }
-        </div>
-      </div>
-      <p class="text-[10px] font-bold truncate">${escapeHtml(skin.name)}</p>
-      <p class="text-[8px] text-on-surface-variant font-medium">${timeAgo(skin.createdAt)}</p>
     `;
+    const action = card.querySelector('.skin-apply-btn, .skin-remove-btn');
+    action.setAttribute('aria-label', `${isActive ? 'Remove' : 'Apply'} ${skin.name}`);
 
     // Click card to open chat
     card.addEventListener('click', (e) => {
@@ -185,7 +195,7 @@ function renderHistory() {
         e.stopPropagation();
         return;
       }
-      openSkinChat(skin);
+      if (e.target.closest('.skin-open-btn')) openSkinChat(skin);
     });
 
     list.appendChild(card);
@@ -259,6 +269,8 @@ function renderChat() {
   // Disable input while generating
   document.getElementById('chat-input').disabled = state.isGenerating;
   document.getElementById('btn-chat-send').disabled = state.isGenerating;
+  document.getElementById('btn-save-skin').disabled = state.isGenerating || !state.currentSkin;
+  document.getElementById('btn-publish-skin').disabled = state.isGenerating || !state.currentSkin;
 }
 
 function renderSettings() {
@@ -276,18 +288,18 @@ function renderSettings() {
 // ===== Event Listeners =====
 
 function setupEventListeners() {
+  document.getElementById('btn-retry-storage').addEventListener('click', loadLocalState);
+  document.getElementById('btn-dismiss-status').addEventListener('click', () => document.getElementById('status-bar').classList.add('hidden'));
   // Navigation
   document.getElementById('btn-settings').addEventListener('click', () => {
-    state.view = 'settings';
-    render();
+    navigate('settings', 'btn-settings-back');
   });
   document.getElementById('btn-settings-back').addEventListener('click', () => {
-    state.view = 'home';
-    render();
+    navigate('home', 'btn-settings');
   });
   document.getElementById('btn-chat-back').addEventListener('click', () => {
-    state.view = 'home';
-    refreshSkins().then(render);
+    navigate('home', 'prompt-input');
+    refreshSkins().then(render).catch(() => showStatus('Could not refresh saved skins. Retry local storage on Home.', 'error'));
   });
 
   // API Key (home)
@@ -350,20 +362,44 @@ function setupEventListeners() {
     } catch {showKeyStatus('settings-key-status','Could not remove the key. Try again.','error');}
   });
   document.getElementById('settings-model').addEventListener('change', async (e) => {
-    state.model = e.target.value;
-    await setModel(state.model);
+    const select = e.target;
+    select.disabled = true;
+    try {await setModel(select.value);state.model = select.value;showStatus('Model saved for the next generation.');}
+    catch {select.value = state.model;showStatus('Could not save the model. Previous choice retained. Try again.', 'error');}
+    finally {select.disabled = false;}
   });
-  document.getElementById('btn-clear-history').addEventListener('click', async () => {
-    if (confirm('Clear all skins? This cannot be undone.')) {
+  const clearDialog = document.getElementById('clear-dialog');
+  document.getElementById('btn-clear-history').addEventListener('click', () => {
+    clearDialog.showModal();document.getElementById('btn-clear-cancel').focus();
+  });
+  document.getElementById('btn-clear-cancel').addEventListener('click', () => clearDialog.close());
+  document.getElementById('btn-clear-confirm').addEventListener('click', async () => {
+    const button = document.getElementById('btn-clear-confirm');button.disabled = true;
+    try {
+      if (state.tabId) await sendToBackground({action: 'remove-skin', tabId: state.tabId, domain: state.domain});
       await clearAllData();
-      if (state.tabId) {
-        chrome.runtime.sendMessage({ action: 'remove-skin', tabId: state.tabId, domain: state.domain });
-      }
       await refreshSkins();
+      clearDialog.close();
       render();
       showStatus('All skins cleared', 'warning');
+    } catch {document.getElementById('clear-error').textContent = 'Could not finish clearing skins. Your saved data may still be present. Retry or cancel.';}
+    finally {button.disabled = false;}
+  });
+  clearDialog.addEventListener('close', () => {document.getElementById('clear-error').textContent = '';document.getElementById('btn-clear-history').focus();});
+  clearDialog.addEventListener('keydown', event => {
+    if (event.key !== 'Tab') return;
+    const buttons = [...clearDialog.querySelectorAll('button:not(:disabled)')];
+    const first = buttons[0], last = buttons.at(-1);
+    if ((!event.shiftKey && document.activeElement === last) || (event.shiftKey && document.activeElement === first)) {
+      event.preventDefault();(event.shiftKey ? last : first).focus();
     }
   });
+}
+
+async function sendToBackground(message) {
+  const response = await chrome.runtime.sendMessage(message);
+  if (response?.error) throw new Error(response.error);
+  return response;
 }
 
 // ===== Handlers =====
@@ -412,7 +448,8 @@ async function handleSettingsSaveKey() {
 let lastGenerateTime = 0;
 
 async function ensureAiConsent() {
-  const context=await chrome.runtime.sendMessage({action:'get-ai-consent',tabId:state.tabId});
+  try {
+  const context=await sendToBackground({action:'get-ai-consent',tabId:state.tabId});
   if(context.error){showStatus(context.error,'error');return false;}
   if(context.granted)return true;
   const approved=confirm(`Allow AI styling on ${context.origin}?\n\nRendered page text and layout (including content outside the viewport), your prompt, and up to four screenshots will be sent to Anthropic using ${state.model}. They can include private messages, photos or other information visible on the page.\n\nEach generation or refinement can make up to five paid API requests charged to your Anthropic account. Keep this tab active during visual reviews.\n\nAllow for this site? You can revoke access in Settings.`);
@@ -420,6 +457,7 @@ async function ensureAiConsent() {
   const result=await chrome.runtime.sendMessage({action:'record-ai-consent',tabId:state.tabId});
   if(result.error){showStatus(result.error,'error');return false;}
   return true;
+  } catch {showStatus('Could not contact WebSkins. Reopen the popup and try again. No AI request was started.', 'error');return false;}
 }
 
 async function handleGenerate() {
@@ -428,6 +466,7 @@ async function handleGenerate() {
   lastGenerateTime = now;
 
   if (state.isGenerating) return;
+  if (!state.localReady) {showStatus('Retry local storage on Home before starting a generation.', 'error');return;}
   const prompt = document.getElementById('prompt-input').value.trim();
   if (!prompt) return;
 
@@ -539,12 +578,12 @@ async function handleChatSend() {
       state.currentSkin.updatedAt = Date.now();
 
       // Auto-save so closing popup doesn't lose work (don't auto-activate)
-      chrome.runtime.sendMessage({
+      await sendToBackground({
         action: 'save-skin',
         domain: state.domain,
         skin: state.currentSkin,
         activate: false,
-      }).catch(() => {});
+      });
     }
 
     state.isGenerating = false;
@@ -558,7 +597,7 @@ async function handleChatSend() {
 
 async function handleApplySkin(skin) {
   try {
-    await chrome.runtime.sendMessage({
+    await sendToBackground({
       action: 'apply-skin',
       tabId: state.tabId,
       domain: state.domain,
@@ -575,7 +614,7 @@ async function handleApplySkin(skin) {
 
 async function handleRemoveSkin() {
   try {
-    await chrome.runtime.sendMessage({
+    await sendToBackground({
       action: 'remove-skin',
       tabId: state.tabId,
       domain: state.domain,
@@ -595,7 +634,7 @@ async function handleSaveSkinFromChat() {
   state.currentSkin.updatedAt = Date.now();
 
   try {
-    await chrome.runtime.sendMessage({
+    await sendToBackground({
       action: 'save-skin',
       domain: state.domain,
       skin: state.currentSkin,
@@ -614,6 +653,7 @@ function openSkinChat(skin) {
   ];
   state.view = 'chat';
   render();
+  document.getElementById('chat-input').focus();
 }
 
 function handleProgress(data) {
@@ -624,15 +664,29 @@ function handleProgress(data) {
 
 // ===== Community / Marketplace =====
 
+let communityRequest = 0;
 async function loadCommunitySkins() {
+  const request = ++communityRequest;
+  state.communityLoading = true;
+  state.communityError = false;
+  renderCommunity();
+  try {
   const data = await fetchSkinsByDomain(state.domain, 1, state.communitySort);
   // Also fetch global trending if domain-specific is empty
   if (!data.skins?.length) {
     const global = await fetchTrendingSkins(null, state.communitySort);
+    if (request !== communityRequest) return;
     state.communitySkins = global.skins || [];
   } else {
+    if (request !== communityRequest) return;
     state.communitySkins = data.skins || [];
   }
+  } catch {
+    if (request !== communityRequest) return;
+    state.communityError = true;
+  }
+  if (request !== communityRequest) return;
+  state.communityLoading = false;
   renderCommunity();
 }
 
@@ -647,10 +701,23 @@ function renderCommunity() {
     hotTab.classList.toggle('text-on-surface-variant', state.communitySort !== 'trending');
     newTab.classList.toggle('sort-tab-active', state.communitySort === 'newest');
     newTab.classList.toggle('text-on-surface-variant', state.communitySort !== 'newest');
+    hotTab.setAttribute('aria-pressed', String(state.communitySort === 'trending'));
+    newTab.setAttribute('aria-pressed', String(state.communitySort === 'newest'));
+  }
+
+  list.setAttribute('aria-busy', String(state.communityLoading));
+  if (state.communityLoading) {
+    list.innerHTML = '<p class="text-xs text-on-surface-variant py-4" role="status">Loading community skins…</p>';
+    return;
+  }
+  if (state.communityError) {
+    list.innerHTML = '<p class="text-xs text-error py-2" role="status">Community could not load. Your saved skins are still on this device.</p><button id="btn-retry-community" class="retry-button">Retry community</button>';
+    document.getElementById('btn-retry-community').addEventListener('click', loadCommunitySkins);
+    return;
   }
 
   if (!state.communitySkins.length) {
-    list.innerHTML = '<p class="text-[10px] text-on-surface-variant text-center py-6">No skins yet — be the first to publish!</p>';
+    list.innerHTML = '<p class="text-xs text-on-surface-variant py-4" role="status">No community skins yet. You can create a private skin above.</p>';
     return;
   }
 
@@ -668,13 +735,13 @@ function renderCommunity() {
         <p class="text-[9px] text-on-surface-variant mb-1.5">by @${escapeHtml(skin.authorName)}</p>
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2.5">
-            <button class="community-like flex items-center gap-0.5 hover:opacity-70 transition-opacity" data-id="${skin.id}">
-              <span class="material-symbols-outlined text-[10px] ${isVoted ? 'voted' : 'text-tertiary'}" style="font-variation-settings: 'FILL' 1;">favorite</span>
+            <button class="community-like flex items-center gap-0.5 hover:opacity-70 transition-opacity" aria-label="Like ${escapeHtml(skin.name)}" aria-pressed="${isVoted}" ${isVoted ? 'disabled' : ''}>
+              <span aria-hidden="true" class="${isVoted ? 'voted' : 'text-tertiary'}">♥</span>
               <span class="text-[8px] font-bold text-on-surface-variant">${formatCount(skin.likes)}</span>
             </button>
             <span class="text-[8px] text-on-surface-variant">${formatCount(skin.installs)} installs</span>
           </div>
-          <button class="community-install bg-secondary-container text-on-secondary-container text-[9px] font-extrabold px-2.5 py-0.5 rounded-full active:scale-95 transition-transform" data-id="${skin.id}">INSTALL</button>
+          <button class="community-install bg-secondary-container text-on-secondary-container text-xs font-extrabold px-2.5 py-1.5 rounded-full active:scale-95 transition-transform" aria-label="Install ${escapeHtml(skin.name)}">INSTALL</button>
         </div>
       </div>
     `;
@@ -711,7 +778,7 @@ async function handleInstallCommunity(skinId) {
     await saveSkin(state.domain, skin);
 
     // Apply it
-    await chrome.runtime.sendMessage({
+    await sendToBackground({
       action: 'apply-skin',
       tabId: state.tabId,
       domain: state.domain,
@@ -733,14 +800,14 @@ async function handleVoteSkin(skinId) {
   try {
     await apiLikeSkin(skinId);
     state.votedSkins.add(skinId);
-    await chrome.storage.local.set({ webskins_voted: [...state.votedSkins] });
-
     // Update count locally
     const skin = state.communitySkins.find(s => s.id === skinId);
     if (skin) skin.likes++;
     renderCommunity();
+    try {await chrome.storage.local.set({ webskins_voted: [...state.votedSkins] });}
+    catch {showStatus('Like recorded, but this device could not remember it. Do not vote again.', 'warning');}
   } catch {
-    // Silently fail
+    showStatus('Could not record the like. Try again.', 'error');
   }
 }
 
@@ -775,16 +842,15 @@ function formatCount(n) {
 
 // ===== UI Helpers =====
 
+let statusTimer;
 function showStatus(message, type = 'success') {
   const bar = document.getElementById('status-bar');
   const text = document.getElementById('status-text');
-  const dot = document.getElementById('status-dot');
-
-  text.textContent = (message || 'Unknown error').toUpperCase();
-  dot.className = `w-1.5 h-1.5 rounded-full ${type === 'error' ? 'bg-red-400' : type === 'warning' ? 'bg-yellow-400' : 'bg-emerald-400'}`;
-
-  bar.classList.add('status-visible');
-  setTimeout(() => bar.classList.remove('status-visible'), 2500);
+  text.textContent = message || 'Unknown error';
+  bar.classList.toggle('feedback-error', type === 'error');
+  bar.classList.remove('hidden');
+  clearTimeout(statusTimer);
+  if (type === 'success') statusTimer = setTimeout(() => bar.classList.add('hidden'), 4500);
 }
 
 function showKeyStatus(elementId, message, type) {
@@ -797,7 +863,7 @@ function showKeyStatus(elementId, message, type) {
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  return div.innerHTML.replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 }
 
 function timeAgo(timestamp) {

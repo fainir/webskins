@@ -7,29 +7,24 @@ function getBaseUrl() {
 }
 
 export async function fetchTrendingSkins(domain, sort = 'trending') {
-  try {
-    const params = new URLSearchParams({ sort, limit: '10' });
-    if (domain) params.set('domain', domain);
+  const params = new URLSearchParams({ sort, limit: '10' });
+  if (domain) params.set('domain', domain);
 
-    const res = await fetch(`${getBaseUrl()}/api/skins?${params}`);
-    if (!res.ok) return { skins: [], pagination: {} };
-
-    return res.json();
-  } catch {
-    return { skins: [], pagination: {} };
-  }
+  const res = await fetch(`${getBaseUrl()}/api/skins?${params}`, {signal: AbortSignal.timeout(10000)});
+  return readSkinList(res);
 }
 
 export async function fetchSkinsByDomain(domain, page = 1, sort = 'trending') {
-  try {
-    const params = new URLSearchParams({ domain, page: String(page), limit: '20', sort });
-    const res = await fetch(`${getBaseUrl()}/api/skins?${params}`);
-    if (!res.ok) return { skins: [], pagination: {} };
+  const params = new URLSearchParams({ domain, page: String(page), limit: '20', sort });
+  const res = await fetch(`${getBaseUrl()}/api/skins?${params}`, {signal: AbortSignal.timeout(10000)});
+  return readSkinList(res);
+}
 
-    return res.json();
-  } catch {
-    return { skins: [], pagination: {} };
-  }
+async function readSkinList(res) {
+  if (!res.ok) throw new Error('Community is unavailable. Your saved skins are still on this device.');
+  const data = await res.json();
+  if (!Array.isArray(data.skins)) throw new Error('Community returned an unreadable list.');
+  return data;
 }
 
 export async function getSkinDetails(id) {

@@ -1,8 +1,11 @@
 import {buildSync} from 'esbuild';
 import { cpSync, mkdirSync, rmSync, existsSync } from 'fs';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
-const DIST = 'dist';
+// Only these two fixed output directories may be replaced. Never accept a path.
+const args = process.argv.slice(2);
+if (args.some(arg => arg !== '--candidate')) throw new Error('Use --candidate or no build argument');
+const DIST = args.includes('--candidate') ? 'candidate-dist' : 'dist';
 
 // Clean
 if (existsSync(DIST)) rmSync(DIST, { recursive: true });
@@ -28,6 +31,6 @@ if (existsSync('icons')) {
 
 // Build Tailwind CSS
 console.log('Building Tailwind CSS...');
-execSync('npx tailwindcss -i src/popup.css -o dist/popup.css --minify', { stdio: 'inherit' });
+execFileSync(process.execPath, ['node_modules/tailwindcss/lib/cli.js', '-i', 'src/popup.css', '-o', `${DIST}/popup.css`, '--minify'], { stdio: 'inherit' });
 
-console.log('Build complete → dist/');
+console.log(`Build complete → ${DIST}/`);
