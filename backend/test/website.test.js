@@ -26,6 +26,7 @@ test('owned website assets and analytics configuration preserve API and extensio
     const config = await fetch(base + '/analytics-config.json');
     assert.equal(config.headers.get('cache-control'), 'no-store');
     assert.deepEqual(await config.json(), {gaId: 'G-SYNTHETIC01', mixpanelToken: 'a'.repeat(32), betterloopKey: 'bl_synthetic_public_write'});
+    for (const route of ['/contact','/terms']) { const response=await fetch(base+route); assert.equal(response.status,200); const text=await response.text(); assert.doesNotMatch(text,/src="\/analytics.js"/); assert.match(text,/Free extension|extension and local skin features are free/); }
     const privacy = await fetch(base + '/privacy');
     assert.equal(privacy.status, 200);
     assert.doesNotMatch(await privacy.text(), /src="\/analytics.js"/);

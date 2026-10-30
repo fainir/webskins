@@ -42,3 +42,10 @@ Every row serves [GOAL.md](GOAL.md) and portfolio PT07. Done is verified, cut, o
 
 -2026-10-29 - Fixed concrete popup recovery/keyboard/contrast defects in separate1.0.6 candidate. Actual400x600 synthetic UI passes; no real AI/community publication, key access, installed extension or accepted package mutation. Coordinator owns privacy rollout and pending Store guide replacement.
 -2026-10-29 - Distilled still-valid installed/API/package acceptance into a short ledger. No accepted package/runtime code, browser permission, provider call or Store submission changed. Missing broad popup UX and reproducible CI/docs remain buildable.
+
+## Contact, legal and cost request
+
+| ID | Flow / gate | Status | Evidence / next action |
+|---|---|---|---|
+| E1 | Discover Contact, Privacy and Terms with clear Free/BYOK costs | building | Website-only source; installed extension and Store candidate unchanged; actual375/1440 QA next |
+| E2 | Contact form emails the owner with a safe reply path and truthful failures | building | Shared existing Betterloop mail relay is being prepared; no new key/account; mocked UI first, real delivery only after bounded coordinator approval |

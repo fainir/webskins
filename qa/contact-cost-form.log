@@ -1,0 +1,3 @@
+375px: actual contact UI validates, preserves text after503/429, reuses retry key, blocks duplicate pending send and preserves edits; accepted-for-delivery copy and supported draft fallback pass. No analytics, page errors, overflow, app writes or actual email.
+1440px: actual contact UI validates, preserves text after503/429, reuses retry key, blocks duplicate pending send and preserves edits; accepted-for-delivery copy and supported draft fallback pass. No analytics, page errors, overflow, app writes or actual email.
+JS disabled375px: Send remains disabled, POST fallback declared, direct-email guidance visible, native Enter emits no request and private fields never enter the URL.

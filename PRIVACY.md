@@ -1,6 +1,6 @@
 # WebSkins Privacy Policy
 
-Last updated: October 30, 2026
+Last updated: October 31, 2026
 
 ## Purpose and AI consent
 
@@ -43,6 +43,10 @@ Uninstalling the extension removes its local Chrome storage, including private p
 ## Optional public website analytics
 
 The public WebSkins landing page can load Google Analytics, Mixpanel and Betterloop only after you allow them in Analytics choices on that website. They remain off by default. If allowed, those services receive basic page and fixed button events, with random device identifiers or cookies. Query strings, fragments, form values, page captures, prompts, API keys and publication keys are not sent. Advertising features, text capture and session replay are disabled. Do Not Track and Global Privacy Control keep website analytics off; Analytics choices can withdraw a previous choice and clear this website's analytics identifiers. Website analytics are not added to the extension or the websites you browse. The separate privacy page and marketplace API do not load these trackers.
+
+## Contact messages
+
+The website contact form sends your name, email address and message through Nir's Betterloop support service and Resend for delivery to fainir2006@gmail.com. Your email is used as Reply-To so Nir can answer from the support inbox. Delivery and abuse-prevention records may be retained by the support service, and emails remain in the support mailbox as needed to handle your request. No automatic confirmation email or response deadline is promised. Do not submit API keys, publication-management keys, passwords or private page captures. You may instead email the same address directly; you can ask about access or removal of your contact message there. The contact page does not load website analytics.
 
 ## Contact and limited use
 
