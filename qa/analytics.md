@@ -20,3 +20,7 @@ This adds an owned normal public landing page at the existing API origin. It doe
 Node24 website HTTP test passes: `node --experimental-sqlite --test test/website.test.js` from backend. Final actual-server UI command: `node qa/check-website-analytics-http.mjs` from the repository root (24 browser checks). Logs: `qa/website-analytics-http.log`, `qa/website-analytics-browser.log`. No extension build/package command was run; installed1.0.5/dist and separate1.0.6 candidate remain unchanged.
 
 Existing rollout from backend: `railway up --service webskins-api --detach`. Preserve the marketplace volume/keys and existing Store owner action.
+
+## Remaining activation dependency
+
+Portfolio O9 Chrome recovery unblocks matching Google/Mixpanel dashboard setup, then the owned API landing rollout and real receipts. Installed extension, accepted packages and owner-only Store publication remain unchanged. The single pending connection action is in the portfolio READINESS O9; no duplicate owner request or live receipt claim is made here. Source/local acceptance above remains valid.

@@ -31,7 +31,7 @@ Every row serves [GOAL.md](GOAL.md) and portfolio PT07. Done is verified, cut, o
 | ID | Flow / gate | Status | Evidence / next step |
 |---|---|---|---|
 | A1 | Optional public website analytics, safe fixed events, consent/withdrawal and private-surface exclusion | verified | [Source and actual-server browser acceptance](qa/analytics.md);24 checks at375/1440, build/config checks and visually reviewed screenshots. No genuine provider receipt is claimed |
-| A2 | Configure the correct existing projects/stream privacy settings, deploy and verify real receipt | building (coordinator) | Existing dashboard configuration and public rollout are centrally owned; use the run/config instructions in [acceptance](qa/analytics.md). Missing identifiers keep providers disabled |
+| A2 | Configure the correct existing projects/stream privacy settings, deploy and verify real receipt | owner | Portfolio O9 Chrome recovery unblocks matching Google/Mixpanel dashboard setup, then the owned API landing rollout and real receipts. Installed extension, accepted packages and owner-only Store publication remain unchanged. [Evidence](qa/analytics.md). Do not repeat the already pending Chrome action. |
 
 ## Log (last10)
 
