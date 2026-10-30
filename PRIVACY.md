@@ -1,6 +1,6 @@
 # WebSkins Privacy Policy
 
-Last updated: October 27, 2026
+Last updated: October 30, 2026
 
 ## Purpose and AI consent
 
@@ -39,6 +39,10 @@ Publications remain on the marketplace until removed. The service retains up to 
 Clear All Skins removes local saved skins and active-skin selections. It does not unpublish marketplace copies or remove your API key, consent settings or private publication keys. Revoke AI page access clears the origin approvals. Remove API key clears the locally held API credential. Removing the key or revoking AI access cancels in-progress generation and refinement where possible. Data already transmitted may already be processed or billed by Anthropic.
 
 Uninstalling the extension removes its local Chrome storage, including private publication keys. It does not remove public marketplace records or copies saved by other users. A publication can be removed through the marketplace API with its private management key. Contact support for help; requests without that key require independent ownership verification. Never send API keys or private management keys in email or public issues.
+
+## Optional public website analytics
+
+The public WebSkins landing page can load Google Analytics, Mixpanel and Betterloop only after you allow them in Analytics choices on that website. They remain off by default. If allowed, those services receive basic page and fixed button events, with random device identifiers or cookies. Query strings, fragments, form values, page captures, prompts, API keys and publication keys are not sent. Advertising features, text capture and session replay are disabled. Do Not Track and Global Privacy Control keep website analytics off; Analytics choices can withdraw a previous choice and clear this website's analytics identifiers. Website analytics are not added to the extension or the websites you browse. The separate privacy page and marketplace API do not load these trackers.
 
 ## Contact and limited use
 

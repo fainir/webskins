@@ -21,3 +21,7 @@ For code rollback, redeploy the previous successful compatible API deployment, r
 ## Extension distribution
 
 The existing owner upload action now has a separate1.0.6 replacement candidate described in qa/store-candidate.md. Keep the accepted1.0.5 ZIP as rollback and do not overwrite its installed dist. The owner uses the same existing Chrome Store item and prepared accurate listing/privacy disclosures, then submits for review. No console automation workaround is allowed. Observe the public listing after submission; do not call a local candidate publicly distributed. Keep the Store copy/data installed when switching between an unpacked candidate and Store release.
+
+## Public website analytics
+
+The existing API serves an owned website at `/`, plus the version-specific `/privacy` document. Only the owned landing page may load optional Google Analytics, Mixpanel and Betterloop, after a local device choice; browser privacy signals override it. The extension, community API, installed dist/ZIP and candidate package are unchanged. Set optional `GA_ID`, `MIXPANEL_TOKEN` and `BETTERLOOP_KEY` public identifiers on the existing `webskins-api` service; unset identifiers stay disabled. `/analytics-config.json` exposes only those public browser identifiers. No new hosting, API secrets or browser permissions are needed.

@@ -18,13 +18,20 @@ Every row serves [GOAL.md](GOAL.md) and portfolio PT07. Done is verified, cut, o
 | F3 | Public skins, private management keys, scoped deletion, quotas and restore | verified | Actual synthetic API ownership/counter/health/SQLite restore and published privacy source accepted. [Proof](qa/accepted.md) | [Goal](GOAL.md) |
 | U1 | Remaining popup screens, keyboard/focus, visible empty/loading/error feedback and contrast | verified | October29 separate1.0.6 candidate: actual compiled400x600 DOM with synthetic Chrome facade. Keyboard history, focus/dialog loop/Escape, persistent truthful errors, storage/community/model/clear retry; six screenshots, text contrast≥5.31:1, no uncaught errors or external requests. [Proof](qa/popup/notes.md). Does not replace retained installed/provider acceptance | [Goal](GOAL.md) |
 | G1 | Reproducible source-only checks, dependency audit and documented deployment/rollback | verified | [Isolated workflow proof](qa/ci.md):21 extension checks, backend ownership/restore, both clean installs/build and zero runtime vulnerabilities. Accepted dist/ZIP unchanged | [Goal](GOAL.md) |
-| G2 | Phone web-app Lighthouse gate for extension popup | cut (not applicable) | This is a fixed desktop Chrome extension popup, not a phone website. Verify its real viewport/keyboard UI in U1; API has no application screen. Public privacy document remains covered by API/public-policy acceptance | [Goal](GOAL.md) |
+| G2 | Phone web-app Lighthouse gate for extension popup | cut (not applicable) | This is a fixed desktop Chrome extension popup, not a phone website. Verify its real viewport/keyboard UI in U1; The extension popup is unchanged; the new owned public landing page is covered separately by A1 | [Goal](GOAL.md) |
 | G3 |1.0.5 package, manifest, privacy and accurate Store copy match | verified | All13 accepted dist files match ZIP; exact manifest summary, detailed listing, release notes/privacy prepared. [Proof](qa/accepted.md) | [Goal](GOAL.md) |
 | G5 |1.0.6 replacement candidate package and source workflow | verified | All22 extension tests, synthetic backend ownership/restore, clean installs/build and both runtime audits pass in disposable source copy. Candidate ZIP matches all13 files, manifest differs from1.0.5 only in version, accepted dist/ZIP unchanged. [Candidate](qa/store-candidate.md) | [Goal](GOAL.md) |
 | R1 | Publish the version-aware privacy document on existing API | verified | Existing rollout SUCCESS; public health/backup200, exact current privacy and375/1440 version-disclosure checks pass without external requests or page errors. [Public release/rollback](qa/privacy-release.md) | [Goal](GOAL.md) |
 | G4 | Hosted CI execution | owner | Existing shared Actions budget; local source workflow must pass, no paid increase authorized | [Goal](GOAL.md) |
 | O1 | Upload checked replacement1.0.6 ZIP and prepared listing/privacy text; Submit for Review | owner | Same pending owner action, not requested again. [Replacement details](qa/store-candidate.md), [coordinator guide](/Users/nirfeinstein/Documents/ChatGPT/almost%20finished%20projects%20+%20marketing/artifacts/production-readiness-2026-10-26/webskins-store-upload-guide.html). Browser policy blocks automated developer-console operation | [Goal](GOAL.md) |
 | W1 | Store review and public replacement publication | waiting | Check public listing day after owner submission, at most daily; existing public1.0.2 remains separate | [Goal](GOAL.md) |
+
+## October30 analytics request
+
+| ID | Flow / gate | Status | Evidence / next step |
+|---|---|---|---|
+| A1 | Optional public website analytics, safe fixed events, consent/withdrawal and private-surface exclusion | verified | [Source and actual-server browser acceptance](qa/analytics.md);24 checks at375/1440, build/config checks and visually reviewed screenshots. No genuine provider receipt is claimed |
+| A2 | Configure the correct existing projects/stream privacy settings, deploy and verify real receipt | building (coordinator) | Existing dashboard configuration and public rollout are centrally owned; use the run/config instructions in [acceptance](qa/analytics.md). Missing identifiers keep providers disabled |
 
 ## Log (last10)
 
