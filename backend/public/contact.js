@@ -30,6 +30,7 @@
     if (state?.busy) return;
     if (!state || state.signature !== signature) {
       if (!window.crypto?.randomUUID) {
+        status.hidden = false;
         status.textContent = 'This browser cannot send the form securely. Please use the email link instead.';
         return;
       }
@@ -65,6 +66,7 @@
       const currentSubject = field('subject');
       const current = JSON.stringify({product:form.dataset.contactProduct,name:field('name'),email:field('email'),message:(currentSubject?'Subject: '+currentSubject+'\n\n':'')+field('message'),website:field('website')});
       if (current === signature) form.reset();
+      states.delete(form);
       status.textContent = current === signature
         ? 'Your message was accepted for email delivery. No automatic confirmation email or reply deadline is promised.'
         : 'Your original message was accepted for email delivery. Your newer edits are still here and have not been sent.';
