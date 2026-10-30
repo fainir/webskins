@@ -1,0 +1,3 @@
+375px: real Betterloop HTTP200/ok, one safe pageview; Google/Mixpanel absent; default off, withdrawal/identifiers/reload, saved-allow private boundary, no overflow/page errors/unexpected writes.
+1440px: real Betterloop HTTP200/ok, one safe pageview; Google/Mixpanel absent; default off, withdrawal/identifiers/reload, saved-allow private boundary, no overflow/page errors/unexpected writes.
+DNT/GPC override saved allowance with zero vendor requests. Provider HTTP acceptance only; dashboard reporting is unverified.

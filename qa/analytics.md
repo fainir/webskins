@@ -24,3 +24,11 @@ Existing rollout from backend: `railway up --service webskins-api --detach`. Pre
 ## Remaining activation dependency
 
 Portfolio O9 Chrome recovery unblocks matching Google/Mixpanel dashboard setup, then the owned API landing rollout and real receipts. Installed extension, accepted packages and owner-only Store publication remain unchanged. The single pending connection action is in the portfolio READINESS O9; no duplicate owner request or live receipt claim is made here. Source/local acceptance above remains valid.
+
+## Betterloop production acceptance
+
+Existing API deployment `98282f09-282b-48f1-8e11-ca6ab3d1ebf9` is SUCCESS, from accepted backend source `3579948` with only the existing Betterloop public key configured. Google and Mixpanel remain disabled, so the three-provider request is incomplete. Marketplace data/keys, volume, extension dist and Store packages are preserved. A normal merge of remote main afterward changes no runtime files; divergent local main remains untouched.
+
+Real 375px and1440px browser checks received Betterloop HTTP200/ok with one safe pageview. Default off, query/hash omission, withdrawal, identifier cleanup/reload, saved-allow policy exclusion and DNT/GPC pass without page errors, overflow or unrelated writes. No provider response was intercepted. [Live log](analytics-live-partial.log), [phone](analytics/live-partial-375.jpg), [desktop](analytics/live-partial-1440.jpg). Reproducible runner: portfolio `artifacts/check-analytics-partial.mjs webskins`.
+
+The coordinator is finishing Google/Mixpanel dashboard setup after Chrome returned. No extension build, installation or developer-console action was performed.
