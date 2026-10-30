@@ -1,0 +1,8 @@
+Final existing-image runtime release b3fe9a8a-c498-409e-a4b2-2a1578d70862: SUCCESS; same accepted image cb7e0fc1 and /data preserved; no source upload, extension build or package mutation.
+/health: HTTP200
+/analytics-config.json: HTTP200
+Public runtime identifiers exactly match the owned dashboard projects; configuration is no-store.
+/privacy: HTTP200
+analytics.js: public bytes match accepted source.
+analytics.css: public bytes match accepted source.
+website.css: public bytes match accepted source.

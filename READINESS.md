@@ -31,10 +31,12 @@ Every row serves [GOAL.md](GOAL.md) and portfolio PT07. Done is verified, cut, o
 | ID | Flow / gate | Status | Evidence / next step |
 |---|---|---|---|
 | A1 | Optional public website analytics, safe fixed events, consent/withdrawal and private-surface exclusion | verified | [Source and actual-server browser acceptance](qa/analytics.md);24 checks at375/1440, build/config checks and visually reviewed screenshots. No genuine provider receipt is claimed |
-| A2 | Configure the correct existing projects/stream privacy settings, deploy and verify real receipt | building (Codex) | Betterloop is live and accepted below. Coordinator is completing matching Google/Mixpanel setup. Installed extension, accepted packages and owner-only Store publication remain unchanged. [Evidence](qa/analytics.md). |
-| A3 | Consented Betterloop on the owned public landing page | verified | Existing API deployment98282f09 is SUCCESS. Real375/1440 HTTP200/ok, default off, safe pageview, withdrawal/identifier cleanup/reload, saved-allow policy exclusion and DNT/GPC pass. Google/Mixpanel remain disabled. [Log](qa/analytics-live-partial.log), [phone](qa/analytics/live-partial-375.jpg), [desktop](qa/analytics/live-partial-1440.jpg). |
+| A2 | Configure the correct existing projects/stream privacy settings, deploy and verify real receipt | verified | Matching manual-only Google and free website Mixpanel projects configured by existing-image release b3fe9a8a. Actual375/1440 Google204/MP1/BLok, consent/withdrawal/private-policy/DNT/GPC pass. Installed extension/packages/marketplace data and owner-only Store step preserved. [Acceptance](qa/analytics.md). |
+| A3 | Consented Betterloop on the owned public landing page | verified | Existing API deployment98282f09 is SUCCESS. Real375/1440 HTTP200/ok, default off, safe pageview, withdrawal/identifier cleanup/reload, saved-allow policy exclusion and DNT/GPC pass. This is retained earlier partial proof; A2 supersedes its activation state. [Log](qa/analytics-live-partial.log), [phone](qa/analytics/live-partial-375.jpg), [desktop](qa/analytics/live-partial-1440.jpg). |
 
 ## Log (last10)
+
+-2026-10-30 - All-three website analytics is live/public-accepted at375/1440 on the existing image/data volume. Matching free dashboard projects and saved manual-only Google verified; no extension/package/Store or private credential change. [Acceptance](qa/analytics.md).
 
 -2026-10-29 - Version-aware API privacy is live/public-accepted at375/1440. Separate1.0.6 popup/package/workflow gates pass and existing pending Store guide points to replacement ZIP; installed1.0.5 remains unchanged. No buildable row remains; Store/hosted-CI owner and review waits retained.
 

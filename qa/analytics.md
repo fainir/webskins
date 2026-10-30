@@ -1,34 +1,26 @@
-# Optional website analytics - source acceptance, October 30, 2026
+# WebSkins optional website analytics - accepted October 30
 
-Google Analytics, Mixpanel and Betterloop are available only after an explicit browser choice, and only when their public identifiers are configured. No account, private provider credential, payment commitment, real email or AI request was created by this change. No live analytics or deployment acceptance is claimed here.
+Google Analytics, Mixpanel and Betterloop are configured and live-accepted on the owned public API landing page. This instruments only https://webskins-api-production.up.railway.app/, not the installed extension, Store page or websites the user browses. Existing installed1.0.5, accepted dist, separate1.0.6 Store candidate and marketplace data/keys remain unchanged.
 
-The real served HTML/runtime was exercised at375px and1440px with third-party responses intercepted. All24 checks pass: no vendors before permission; sanitized query/hash-free page data; fixed event transport and rejection of unknown events; stop/discard and identifier cleanup; saved withdrawal/reload; DNT/GPC; blocked storage; opt-in before configuration arrives; failed withdrawal while old allowed storage and delayed configuration remain; late Betterloop script after withdrawal; missing settings; and a private surface with saved permission. Both screenshots were visually reviewed; native dialog focus returns to Analytics choices and the layout fits both widths.
+## Final production acceptance
 
-- [Phone](analytics/public-375.png), [desktop](analytics/public-1440.png).
-- Runtime configuration is `GET /analytics-config.json` with only `gaId`, `mixpanelToken` and `betterloopKey`, no-store. Service variables: `GA_ID`, `MIXPANEL_TOKEN`, `BETTERLOOP_KEY`. Missing or invalid identifiers leave the corresponding provider disabled.
-- Betterloop script uses `/sdk.js?v=20261030`, `includePaths` and `shutdown({discard:true})`; the coordinator must release that compatible SDK before live configuration.
-- No text capture, session replay, advertising features, arbitrary URL/title or identity fields. Analytics identifiers are created only after permission and removed on withdrawal. Already received events cannot be recalled by a browser opt-out.
+- Existing-image Railway deployment `b3fe9a8a-c498-409e-a4b2-2a1578d70862` is SUCCESS. It reuses the accepted `cb7e0fc1` image and `/data`, with only the two matching public Google/Mixpanel identifiers added. No source upload/build, private API credential or paid resource was created. Health/policy return200 and public assets match accepted source. [Release readback](analytics-runtime-release.log).
+- Google property561625458 / stream16238098301 belongs to the existing ai-tools account. Its website is the actual API landing origin. Enhanced measurement was explicitly disabled and the saved stream reopened/visually verified; the public Google tag has no enhanced event collectors.
+- Mixpanel project4079107, “WebSkins website,” belongs to the existing Nir organization, US residency and Asia/Jerusalem reporting. This separate website project avoids mixing extension browsing with public website usage. Only its public write token is used.
+- Betterloop uses the existing portfolio self-project and approved origin; quotas stay unchanged. The shared accepted SDK supports exact includePaths and discard shutdown. No replay, autocapture, advertising or text/form capture is enabled.
 
-## Live acceptance remaining
+Actual own-site Chrome contexts at375px and1440px receive genuine Google HTTP204, Mixpanel HTTP200/body1 and Betterloop HTTP200/ok. No vendor response is intercepted. Exactly one manual Google pageview and one Betterloop pageview are sent after opt-in; payloads contain only the product, exact public path and random consented device identifier. Query/hash sentinel, identity, form values and private work are absent.
 
-The coordinator owns the existing dashboards, project/stream selection, Google enhanced-measurement settings, service variables, deployment and actual provider receipt. Do not fill missing configuration with another product's identifiers or describe intercepted responses as genuine receipt. Preserve existing service data, authentication and financial gates.
+Default off, withdrawal, accessible identifier/cookie cleanup, disabled Google flag, reload, saved-allow policy exclusion and DNT/GPC pass. Both consent screenshots were visually reviewed; no overflow, page errors or unrelated own-site write occurred. These are provider transport acknowledgements; downstream dashboard processing is a separate outcome.
 
-## This product
+[Actual live result](analytics-live-all.log), [phone](analytics/live-all-375.jpg), [desktop](analytics/live-all-1440.jpg). The bounded runner is `node qa/check-analytics-live.mjs /Users/nirfeinstein/Documents/shelf/node_modules/playwright/index.mjs`, with matching public IDs in `WEBSKINS_QA_GA_ID` and `WEBSKINS_QA_MIXPANEL_TOKEN`. It waits for the asynchronously loaded analytics stylesheet before activating real controls. No repeated provider test is needed without a changed release or new concern.
 
-This adds an owned normal public landing page at the existing API origin. It does not instrument the installed extension, Store page, user browsing, page capture or accepted packages. The landing page truthfully separates the prepared update from the currently published Store version. `/privacy` remains a policy-only page without the analytics script.
+## Retained source and actual-server checks
 
-Node24 website HTTP test passes: `node --experimental-sqlite --test test/website.test.js` from backend. Final actual-server UI command: `node qa/check-website-analytics-http.mjs` from the repository root (24 browser checks). Logs: `qa/website-analytics-http.log`, `qa/website-analytics-browser.log`. No extension build/package command was run; installed1.0.5/dist and separate1.0.6 candidate remain unchanged.
+All24 intercepted real-server UI checks pass at375/1440: no vendors before permission; sanitized links; supported fixed events only; stop/discard and identifier cleanup; saved withdrawal/reload; DNT/GPC; blocked storage; opt-in before configuration; failed withdrawal while delayed configuration remains; late SDK completion after withdrawal; missing settings; and saved allowance on a private surface. Dialog focus returns to Analytics choices. Provider doubles in these earlier tests are source/UI proof, separate from the genuine result above.
 
-Existing rollout from backend: `railway up --service webskins-api --detach`. Preserve the marketplace volume/keys and existing Store owner action.
+[Phone source UI](analytics/public-375.png), [desktop source UI](analytics/public-1440.png), [HTTP log](website-analytics-http.log), [browser log](website-analytics-browser.log). Source command: `node qa/check-website-analytics-http.mjs`. Node24 website HTTP tests passed from backend with `node --experimental-sqlite --test test/website.test.js`. No extension build/package command was run.
 
-## Remaining activation dependency
+Runtime configuration `GET /analytics-config.json` is no-store and exposes only gaId, mixpanelToken and betterloopKey. Variables are `GA_ID`, `MIXPANEL_TOKEN`, `BETTERLOOP_KEY`; missing/invalid identifiers leave a provider off. `/privacy` is a policy-only surface without analytics. The landing page truthfully separates the prepared update from the currently published Store version. Existing Store submission remains owner-only.
 
-Portfolio O9 Chrome recovery unblocks matching Google/Mixpanel dashboard setup, then the owned API landing rollout and real receipts. Installed extension, accepted packages and owner-only Store publication remain unchanged. The single pending connection action is in the portfolio READINESS O9; no duplicate owner request or live receipt claim is made here. Source/local acceptance above remains valid.
-
-## Betterloop production acceptance
-
-Existing API deployment `98282f09-282b-48f1-8e11-ca6ab3d1ebf9` is SUCCESS, from accepted backend source `3579948` with only the existing Betterloop public key configured. Google and Mixpanel remain disabled, so the three-provider request is incomplete. Marketplace data/keys, volume, extension dist and Store packages are preserved. A normal merge of remote main afterward changes no runtime files; divergent local main remains untouched.
-
-Real 375px and1440px browser checks received Betterloop HTTP200/ok with one safe pageview. Default off, query/hash omission, withdrawal, identifier cleanup/reload, saved-allow policy exclusion and DNT/GPC pass without page errors, overflow or unrelated writes. No provider response was intercepted. [Live log](analytics-live-partial.log), [phone](analytics/live-partial-375.jpg), [desktop](analytics/live-partial-1440.jpg). Reproducible runner: portfolio `artifacts/check-analytics-partial.mjs webskins`.
-
-The coordinator is finishing Google/Mixpanel dashboard setup after Chrome returned. No extension build, installation or developer-console action was performed.
+Earlier Betterloop-only receipt is retained as historical partial proof in [its log](analytics-live-partial.log); the three-provider release above supersedes its incomplete activation status.

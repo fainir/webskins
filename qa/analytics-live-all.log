@@ -1,0 +1,5 @@
+375px: actual Google HTTP204, Mixpanel200/body1 and Betterloop200/ok; exactly one safe manual pageview; default off, withdrawal/identifiers/reload/policy exclusion pass, no overflow/page errors/unrelated writes.
+1440px: actual Google HTTP204, Mixpanel200/body1 and Betterloop200/ok; exactly one safe manual pageview; default off, withdrawal/identifiers/reload/policy exclusion pass, no overflow/page errors/unrelated writes.
+doNotTrack: saved allow still produces no provider requests.
+globalPrivacyControl: saved allow still produces no provider requests.
+Real provider transport acknowledgement only; dashboard processing is separate. No model, enquiry, email, owner-data or payment action was made.
