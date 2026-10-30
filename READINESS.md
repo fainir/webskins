@@ -36,6 +36,8 @@ Every row serves [GOAL.md](GOAL.md) and portfolio PT07. Done is verified, cut, o
 
 ## Log (last10)
 
+-2026-10-31 - Owned website Contact/Terms/Privacy and Free/Anthropic-BYOK labels are live. Backend-only release, exact source/health/backup,375/1440 UI and actual contact GmailINBOX/Reply-To pass. Installed1.0.5, separate1.0.6 candidate, Store boundary, marketplace data and existing configuration retained. [Acceptance](readiness/contact-email-costs.md).
+
 -2026-10-30 - All-three website analytics is live/public-accepted at375/1440 on the existing image/data volume. Matching free dashboard projects and saved manual-only Google verified; no extension/package/Store or private credential change. [Acceptance](qa/analytics.md).
 
 -2026-10-29 - Version-aware API privacy is live/public-accepted at375/1440. Separate1.0.6 popup/package/workflow gates pass and existing pending Store guide points to replacement ZIP; installed1.0.5 remains unchanged. No buildable row remains; Store/hosted-CI owner and review waits retained.
@@ -47,5 +49,5 @@ Every row serves [GOAL.md](GOAL.md) and portfolio PT07. Done is verified, cut, o
 
 | ID | Flow / gate | Status | Evidence / next action |
 |---|---|---|---|
-| E1 | Discover Contact, Privacy and Terms with clear Free/BYOK costs | building | Website-only source; installed extension and Store candidate unchanged; actual375/1440 QA next |
-| E2 | Contact form emails the owner with a safe reply path and truthful failures | building | Shared existing Betterloop mail relay is being prepared; no new key/account; mocked UI first, real delivery only after bounded coordinator approval |
+| E1 | Discover Contact, Privacy and Terms with clear Free/BYOK costs | verified | Website-only backend release is SUCCESS; exact live assets/health/backup and actual four-page375/1440 UI pass. [Acceptance](readiness/contact-email-costs.md); installed/Store packages unchanged |
+| E2 | Contact form emails the owner with a safe reply path and truthful failures | verified | Actual phone form200 → GmailINBOX with exact visitor Reply-To; mock375/1440 failure/retry/idempotency/edits/no-JS checks pass. [Acceptance](readiness/contact-email-costs.md); no new key/account |

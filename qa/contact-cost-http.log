@@ -1,6 +1,6 @@
-(node:86260) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:96779) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-✔ owned website assets and analytics configuration preserve API and extension separation (269.743167ms)
+✔ owned website assets and analytics configuration preserve API and extension separation (301.966167ms)
 ℹ tests 1
 ℹ suites 0
 ℹ pass 1
@@ -8,4 +8,4 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 388.489583
+ℹ duration_ms 425.658958
