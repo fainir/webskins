@@ -51,3 +51,12 @@ Every row serves [GOAL.md](GOAL.md) and portfolio PT07. Done is verified, cut, o
 |---|---|---|---|
 | E1 | Discover Contact, Privacy and Terms with clear Free/BYOK costs | verified | Website-only backend release is SUCCESS; exact live assets/health/backup and actual four-page375/1440 UI pass. [Acceptance](readiness/contact-email-costs.md); installed/Store packages unchanged |
 | E2 | Contact form emails the owner with a safe reply path and truthful failures | verified | Actual phone form200 → GmailINBOX with exact visitor Reply-To; mock375/1440 failure/retry/idempotency/edits/no-JS checks pass. [Acceptance](readiness/contact-email-costs.md); no new key/account |
+
+## Claude launch offer - October31
+
+| ID | Flow / gate | Status | Evidence / next action |
+|---|---|---|---|
+| C1 | Choose limited included Claude or optional direct BYOK without leaking a key | building (Codex) | Separate1.0.7 candidate; existing installed1.0.5/dist and1.0.6 archive retained |
+| C2 | New per-mode/site consent, no screenshots or automatic review in included mode | building (Codex) | Single fixed-task request, no direct owner-key fallback; source/cancellation checks |
+| C3 | Compiled popup success, exhaustion, cancel and settings recovery | verified | Actual400x600 candidate included/no-key, quota and BYOK recovery pass; [candidate](readiness/claude-beta.md). Genuine installed check remains |
+| C4 | Live included AI and updated Store distribution | todo | Existing shared gateway acceptance first; Store console remains owner-only |

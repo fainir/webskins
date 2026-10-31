@@ -1,3 +1,4 @@
+import {getAiActor} from './storage.js';
 // Claude Messages API wrapper for WebSkins
 
 const API_URL = 'https://api.anthropic.com/v1/messages';
@@ -87,6 +88,7 @@ QUALITY SCORING:
 The CSS MUST be COMPLETE — it replaces ALL previous CSS. Include everything that works plus your fixes. Aim for 50-150+ rules for thorough coverage.`;
 
 export async function generateSkin(apiKey, model, pageStructure, prompt, existingCss, signal) {
+  if(!apiKey)return includedSkin(pageStructure,prompt,existingCss,signal);
   const messages = [];
 
   let userContent = `Here is the simplified HTML structure of the current webpage:\n\n${pageStructure}\n\n`;
@@ -138,6 +140,10 @@ Review the screenshot above. Find EVERY visual issue and produce an improved, CO
 }
 
 export async function chatRefine(apiKey, model, pageStructure, chatHistory, newMessage, signal) {
+  if(!apiKey) {
+    const current=[...chatHistory].reverse().find(m=>m.skinData?.css)?.skinData?.css || '';
+    return includedSkin(pageStructure,newMessage,current,signal);
+  }
   const messages = [];
 
   // Build conversation from history — skip system messages and the last user message
@@ -245,4 +251,29 @@ async function callClaude(apiKey, model, systemPrompt, messages, signal) {
     }
     throw new Error('Failed to parse AI response as JSON');
   }
+}
+
+export async function includedSkin(context,instruction,css,signal) {
+  if(typeof context!=='string'||typeof instruction!=='string')throw new Error('Page context is unavailable. Refresh this page and try again.');
+  if(new TextEncoder().encode(context).length>24576)throw new Error('This page is too large for the free allowance. Choose your own Claude key in Settings.');
+  if(css&&new TextEncoder().encode(css).length>16384)throw new Error('This saved design is too large for a free refinement. Choose your own Claude key in Settings.');
+  const body={version:1,app:'webskins',feature:'css',request_id:crypto.randomUUID(),actor:await getAiActor(),
+    input:{instruction,context,...(css?{css}:{})}};
+  // One deliberate request. A lost response must never start a second provider call.
+  const response=await fetch('https://betterloopai.com/api/claude/v1/complete',{
+    method:'POST',credentials:'omit',redirect:'error',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal});
+  const data=await response.json().catch(()=>null);
+  if(!response.ok||!data?.ok) {
+    const code=data?.error?.code;
+    if(code==='quota_exhausted')throw new Error('Free allowance used up. Try later or choose your own Claude key in Settings.');
+    if(response.status===409||response.status===504)throw new Error('The request outcome is uncertain. No automatic retry was made.');
+    throw new Error('Included Claude is unavailable. Try later or choose your own Claude key in Settings.');
+  }
+  if(data.stop_reason!=='end_turn')throw new Error('The design was incomplete. Your saved skin was preserved. Try a smaller change.');
+  const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+  try {
+    const parsed=JSON.parse(text.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,''));
+    if(typeof parsed.css!=='string'||!parsed.css.trim())throw new Error();
+    return parsed;
+  }catch {throw new Error('Claude did not return a complete design. Your saved skin was preserved.');}
 }

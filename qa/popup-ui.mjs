@@ -32,7 +32,7 @@ async function open({faults = [], empty = false, community = 'list'} = {}) {
     });
     window.chrome = {tabs:{query:async()=>[{id:44,url:'https://owned.example/'}]},storage:{local:area(values),session:area({},true)},runtime:{onMessage:{addListener:()=>{}},sendMessage:async message => {
       qa.messages.push(message.action);
-      if (qa.messageError) return {error:qa.messageError};
+      if (qa.messageError&&(!qa.messageErrorAction||qa.messageErrorAction===message.action)) return {error:qa.messageError};
       if (message.action === 'get-ai-consent') return {granted:true,origin:'https://owned.example'};
       if (message.action === 'generate-skin') return new Promise(resolve => {qa.generated = () => resolve({skin});});
       if (message.action === 'chat-refine') return {skinData:{name:skin.name,description:'Synthetic refinement',css:skin.css}};
@@ -162,8 +162,12 @@ try {
   }
   {
     const {context,page} = await open({empty:true,community:'slow'});
+    assert.equal(await page.locator('#ai-mode').inputValue(),'included');
+    assert.equal(await page.locator('#api-key-section').isVisible(),false);
     await text(page,'#history-list',/No saved skins/);
     await page.waitForSelector('.community-like');await page.locator('.community-like').click();await text(page,'#status-text',/Could not record/);
+    await page.locator('#ai-mode').selectOption('byok');
+    await page.waitForSelector('#api-key-input:visible');
     await page.locator('#api-key-input').fill('synthetic-session-key');await page.locator('#btn-save-key').click();
     await page.locator('#prompt-input').fill('Synthetic design');await page.locator('#btn-generate').click();
     await visible(page,'#chat-view');assert.equal(await page.locator('#btn-chat-send').isDisabled(),true);
@@ -175,6 +179,28 @@ try {
     assert.doesNotMatch(await page.locator('#status-text').innerText(),/saved/i);
     await context.close();results.push('empty, loading, disabled generation actions, visible like/background-save errors');
   }
+  {
+    const {context,page}=await open({empty:true});
+    await page.locator('#prompt-input').fill('Free navy design');
+    await page.locator('#btn-generate').click();
+    await visible(page,'#chat-view');
+    assert.equal(await page.locator('#btn-chat-send').isDisabled(),true);
+    await page.evaluate(()=>window.__qa.generated());
+    await page.waitForFunction(()=>!document.getElementById('btn-chat-send').disabled);
+    assert.equal(await page.evaluate(()=>__qa.messages.filter(m=>m==='generate-skin').length),1);
+    await screenshot(page,'included');
+    await page.evaluate(()=>{window.__qa.messageError='Free allowance used up. Try later or choose your own Claude key in Settings.';window.__qa.messageErrorAction='chat-refine';});
+    await page.locator('#chat-input').fill('Larger text');await page.locator('#btn-chat-send').click();
+    await text(page,'#status-text',/Free allowance used up/);
+    await page.getByRole('button',{name:'Settings',exact:true}).click();
+    assert.equal(await page.locator('#settings-ai-mode').inputValue(),'included');
+    await page.locator('#settings-ai-mode').selectOption('byok');
+    await page.waitForFunction(()=>__qa.values.webskins_ai_mode==='byok');
+    await page.locator('#btn-settings-back').click();
+    await visible(page,'#api-key-input');
+    assert.equal(await page.locator('#ai-mode').inputValue(),'byok');
+    await context.close();results.push('included generation without key, single deliberate dispatch, actionable exhaustion and Settings BYOK recovery');
+  }
   assert.deepEqual(errors,[],'No uncaught page errors');assert.deepEqual(unexpected,[],'No remote fonts, providers or other requests');
-  console.log(JSON.stringify({viewport:'400x600',version:'1.0.6 candidate',passed:results,contrasts,uncaughtErrors:errors.length,unexpectedRequests:unexpected.length}));
+  console.log(JSON.stringify({viewport:'400x600',version:'1.0.7 candidate',passed:results,contrasts,uncaughtErrors:errors.length,unexpectedRequests:unexpected.length}));
 } finally {await browser.close();await new Promise(resolve => server.close(resolve));}

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 for(const action of ['remove-api-key','revoke-ai-access']) {
  for(const operation of ['generate-skin','chat-refine']) {
  test(`${action} aborts ${operation} and clears the requested data`,async()=>{
-  const saved={webskins_ai_consents_v2:{'https://example.invalid':true}},session={webskins_api_key:'synthetic-session-key'};
+  const saved={webskins_ai_mode:'byok',webskins_ai_consents_v3:{'https://example.invalid|byok':true}},session={webskins_api_key:'synthetic-session-key'};
   const listeners=[];let requests=0,signal,started;
   const providerStarted=new Promise(resolve=>{started=resolve;});
   const previousChrome=globalThis.chrome,previousFetch=globalThis.fetch;
@@ -32,7 +32,7 @@ for(const action of ['remove-api-key','revoke-ai-access']) {
    assert.equal((await send({action})).success,true);assert.equal(signal.aborted,true);
    await generation;assert.equal(requests,1,'cancellation must prevent later paid requests');
    if(action==='remove-api-key')assert.equal(session.webskins_api_key,undefined);
-   else assert.equal(saved.webskins_ai_consents_v2,undefined);
+   else assert.equal(saved.webskins_ai_consents_v3,undefined);
   } finally {globalThis.chrome=previousChrome;globalThis.fetch=previousFetch;
    if(previousNavigator)Object.defineProperty(globalThis,'navigator',previousNavigator);else delete globalThis.navigator;}
  });

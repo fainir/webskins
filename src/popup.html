@@ -45,6 +45,14 @@
       </div>
     </section>
 
+    <section class="px-5 py-2.5 border-b border-outline-variant/10">
+      <label for="ai-mode" class="text-xs font-bold block">Claude usage</label>
+      <select id="ai-mode" class="w-full bg-surface-container-low rounded-xl p-2 text-xs mt-1">
+        <option value="included">Free included Claude</option>
+        <option value="byok">My Claude key (BYOK)</option>
+      </select>
+      <p class="text-xs mt-1">Free mode: one text-only design request, daily and shared budget limits. BYOK: paid directly to Anthropic.</p>
+    </section>
     <!-- API Key Section -->
     <section id="api-key-section" class="px-5 py-2.5 border-b border-outline-variant/10">
       <div class="bg-surface-container-low rounded-xl p-2.5 flex gap-2 items-center">
@@ -142,6 +150,14 @@
         <h2 class="font-headline font-bold text-base tracking-tight">Settings</h2>
       </div>
       <div class="mb-5">
+        <label for="settings-ai-mode" class="text-xs font-bold block">Claude usage</label>
+        <select id="settings-ai-mode" class="w-full bg-surface-container-low rounded-xl p-2 text-xs mt-1">
+          <option value="included">Free included Claude</option>
+          <option value="byok">My Claude key (BYOK)</option>
+        </select>
+        <p class="text-xs mt-1">Included has daily and shared budget limits. Your key is optional and used only in BYOK mode.</p>
+      </div>
+      <div class="mb-5">
         <label for="settings-api-key" class="text-[10px] font-bold text-on-surface-variant tracking-wide block mb-1.5">API KEY</label>
         <div class="bg-surface-container-low rounded-xl p-2.5 flex gap-2 items-center">
           <input id="settings-api-key" class="w-full bg-transparent border-none text-xs focus:ring-0 focus:outline-none placeholder:text-on-surface-variant/50 font-medium px-1" placeholder="sk-ant-..." type="password" aria-label="Settings API Key">
@@ -159,7 +175,7 @@
             <option value="claude-opus-5-5">Claude Opus 5.5 (Advanced)</option>
           </select>
         </div>
-        <p class="text-[9px] text-on-surface-variant mt-1 px-1">Auto-improves until quality is great (up to 4 review cycles)</p>
+        <p class="text-[9px] text-on-surface-variant mt-1 px-1">BYOK only: up to 4 paid visual-review cycles. Free included mode uses Haiku 5.5 and no screenshots.</p>
       </div>
       <div class="mb-5">
         <label class="text-[10px] font-bold text-on-surface-variant tracking-wide block mb-1.5">DATA</label>
@@ -167,11 +183,11 @@
           Clear All Skins
         </button>
       </div>
-      <p class="text-xs px-1 mb-3">AI sends page text/layout and visual-review screenshots to Anthropic using your paid API key, up to five requests per generation or refinement. Local skins use system fonts; resource URLs and CSS variables are removed.</p>
+      <p class="text-xs px-1 mb-3">Included AI sends page text/layout and your instruction through Nir’s shared AI service to Anthropic in one limited request. BYOK sends directly to Anthropic and can use up to five paid requests with screenshots. Local skins use system fonts; resource URLs and CSS variables are removed.</p>
       <button id="btn-revoke-ai-access" class="w-full text-xs py-2">Revoke AI page access</button>
       <p class="text-center text-xs py-2"><a href="https://webskins-api-production.up.railway.app/privacy" target="_blank" rel="noopener noreferrer">Privacy policy</a></p>
       <div class="text-center py-3">
-        <p class="text-[9px] text-on-surface-variant">WebSkins v1.0.6 - Powered by Claude AI</p>
+        <p class="text-[9px] text-on-surface-variant">WebSkins v1.0.7 - Powered by Claude AI</p>
       </div>
     </div>
   </main>

@@ -1,6 +1,6 @@
 // WebSkins Popup — State Management & UI
 import {
-  getApiKey, setApiKey, getModel, setModel,
+  getApiKey, setApiKey, getModel, setModel, getAiMode, setAiMode,
   getSkinsForDomain,
   clearAllData, saveSkin,
 } from './utils/storage.js';
@@ -15,6 +15,7 @@ import {
 
 const state = {
   view: 'home', // 'home' | 'chat' | 'settings'
+  aiMode: 'included',
   apiKey: null,
   apiKeySet: false,
   model: 'claude-sonnet-5-5',
@@ -74,12 +75,13 @@ async function loadLocalState() {
   const results = await Promise.allSettled([
     getApiKey().then(key => {state.apiKey = key;state.apiKeySet = !!key;}),
     getModel().then(model => {state.model = model;}),
+    getAiMode().then(mode => {state.aiMode = mode;}),
     refreshSkins(),
     chrome.storage.local.get('webskins_voted').then(data => {state.votedSkins = new Set(data.webskins_voted || []);}),
   ]);
   state.localReady = results.every(result => result.status === 'fulfilled');
   document.getElementById('storage-error').classList.toggle('hidden', state.localReady);
-  document.getElementById('api-key-section').classList.toggle('hidden', state.apiKeySet);
+  document.getElementById('api-key-section').classList.toggle('hidden', state.apiKeySet || state.aiMode==='included');
   retry.disabled = false;
   retry.textContent = 'Retry local storage';
   render();
@@ -118,6 +120,10 @@ function render() {
   chatView.classList.toggle('hidden', state.view !== 'chat');
   settingsView.classList.toggle('hidden', state.view !== 'settings');
 
+  document.getElementById('ai-mode').value=state.aiMode;
+  document.getElementById('ai-mode').disabled=state.isGenerating;
+  document.getElementById('settings-ai-mode').value=state.aiMode;
+  document.getElementById('settings-ai-mode').disabled=state.isGenerating;
   if (state.view === 'home') renderHome();
   if (state.view === 'chat') renderChat();
   if (state.view === 'settings') renderSettings();
@@ -288,6 +294,10 @@ function renderSettings() {
 // ===== Event Listeners =====
 
 function setupEventListeners() {
+  for(const id of ['ai-mode','settings-ai-mode'])document.getElementById(id).addEventListener('change',async e=>{
+    try {await setAiMode(e.target.value);state.aiMode=e.target.value;await loadLocalState();}
+    catch {showStatus('Could not save AI mode. Retry local storage.','error');}
+  });
   document.getElementById('btn-retry-storage').addEventListener('click', loadLocalState);
   document.getElementById('btn-dismiss-status').addEventListener('click', () => document.getElementById('status-bar').classList.add('hidden'));
   // Navigation
@@ -452,7 +462,11 @@ async function ensureAiConsent() {
   const context=await sendToBackground({action:'get-ai-consent',tabId:state.tabId});
   if(context.error){showStatus(context.error,'error');return false;}
   if(context.granted)return true;
-  const approved=confirm(`Allow AI styling on ${context.origin}?\n\nRendered page text and layout (including content outside the viewport), your prompt, and up to four screenshots will be sent to Anthropic using ${state.model}. They can include private messages, photos or other information visible on the page.\n\nEach generation or refinement can make up to five paid API requests charged to your Anthropic account. Keep this tab active during visual reviews.\n\nAllow for this site? You can revoke access in Settings.`);
+  const included=context.mode==='included';
+  const approved=confirm(`Allow AI styling on ${context.origin}?\n\n${included
+    ? 'Free included Claude sends rendered page text/layout and your instruction through Nir’s shared Betterloop AI service to Anthropic Haiku 5.5. It makes one text-only request, with no screenshots or automatic reviews. Daily and shared budget limits apply; availability is not guaranteed. A random installation ID and a protected network identifier enforce limits.'
+    : `Your Claude key sends rendered page text/layout, your instruction and up to four screenshots directly to Anthropic using ${state.model}. Up to five requests can be charged to your Anthropic account.`}\n\nPage captures may include private messages or other visible content, including content outside the viewport. Only proceed on pages you are comfortable sharing. You can revoke access in Settings.\n\nAllow this mode for this site?`);
+
   if(!approved)return false;
   const result=await chrome.runtime.sendMessage({action:'record-ai-consent',tabId:state.tabId});
   if(result.error){showStatus(result.error,'error');return false;}
@@ -475,7 +489,7 @@ async function handleGenerate() {
     return;
   }
 
-  if (!state.apiKeySet) {
+  if (state.aiMode==='byok'&&!state.apiKeySet) {
     document.getElementById('api-key-section').classList.remove('hidden');
     showKeyStatus('api-key-status', 'Please enter your API key first', 'error');
     return;
@@ -658,6 +672,10 @@ function openSkinChat(skin) {
 
 function handleProgress(data) {
   state.progressMessage = data.message || '';
+  document.getElementById('ai-mode').value=state.aiMode;
+  document.getElementById('ai-mode').disabled=state.isGenerating;
+  document.getElementById('settings-ai-mode').value=state.aiMode;
+  document.getElementById('settings-ai-mode').disabled=state.isGenerating;
   if (state.view === 'home') renderHome();
   if (state.view === 'chat') renderChat();
 }

@@ -21,7 +21,7 @@ try {
    for(const href of ['/contact','/privacy','/terms'])assert.ok(await page.locator('footer a[href="'+href+'"]').count());
    if(route!=='/privacy')assert.match(await page.locator('[data-cost-mode]').innerText(),/free|your own/i);
    if(route==='/contact')assert.match(await page.locator('main').innerText(),/Resend.*Gmail/s);
-   if(route==='/terms')assert.match(await page.locator('main').innerText(),/Anthropic bills.*no subscription or checkout/s);
+   if(route==='/terms'){const terms=await page.locator('main').innerText();assert.match(terms,/billed by Anthropic/);assert.match(terms,/no subscription or checkout/);assert.match(terms,/limited free included-Claude option/);assert.match(terms,/not been published/);}
    if(route==='/privacy')assert.match(await page.locator('main, article').first().innerText(),/contact/i);
    if(route==='/'||route==='/terms')await page.screenshot({path:'qa/contact-cost-'+(route==='/'?'home':'terms')+'-'+width+'.jpg'});
   }

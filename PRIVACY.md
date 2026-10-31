@@ -4,7 +4,7 @@ Last updated: October 31, 2026
 
 ## Purpose and AI consent
 
-WebSkins changes website appearance with CSS. Applying or removing a saved skin does not require AI. Before AI use on each website origin, WebSkins asks for permission to send rendered page text and layout (which can include content outside the current viewport), your design prompt, and visual-review screenshots to Anthropic. Those captures may include private messages, photos or other information visible on the page. Settings can revoke this page access. Each generation or refinement can make up to five paid requests using your Anthropic account.
+WebSkins changes website appearance with CSS. Applying or removing a saved skin does not require AI. Before AI use on each website origin, WebSkins asks for permission to send rendered page text and layout (which can include content outside the current viewport), your design prompt, and visual-review screenshots to Anthropic. Those captures may include private messages, photos or other information visible on the page. Settings can revoke this page access. Starting with version 1.0.7, choose Free included Claude or My Claude key (BYOK). A new per-site consent is required for each mode. Included mode sends bounded page text/layout and your instruction through Nir’s shared Betterloop AI service to Anthropic Haiku 5.5. It makes one text-only request, with no screenshots or automatic reviews. BYOK sends directly to Anthropic and can make up to five paid requests using your Anthropic account. Included availability is limited by daily installation/network limits and a shared operator budget; it is not guaranteed and no payment is taken when it is exhausted.
 
 ## Anthropic API key
 
@@ -12,13 +12,13 @@ Starting with version 1.0.4, the API key uses session-only Chrome storage restri
 
 Earlier versions stored the key in Chrome local extension storage. When version 1.0.4 first loads the key, it migrates that value into session storage and removes the local copy only after verifying the session copy. If migration fails, it preserves the original value and does not return it for an AI request. Removing the key clears both copies.
 
-Your key is sent directly to Anthropic to authenticate your requests. It is not sent to the WebSkins marketplace server. Anthropic's own data-handling policies apply to the prompts, page captures and screenshots it receives.
+When BYOK is selected, your key is sent directly to Anthropic to authenticate your requests. It is not sent to the WebSkins marketplace server. Anthropic's own data-handling policies apply to the prompts, page captures and screenshots it receives.
 
 ## Data on your device
 
 Version 1.0.5 excludes hidden elements and form-control text/values from DOM capture. Captures are bounded to 500 nodes, eight levels and 30,000 characters to limit unnecessary data and provider input. Visual-review screenshots can still include information visible on the active page.
 
-Chrome local extension storage retains your model and skin preferences, saved CSS skins, design prompts and chat history, per-origin consent choices, marketplace votes, a random author identifier, and private publication-management keys. Saved local data is not a secure vault. Protect access to your browser profile. Raw captured page layout and screenshots are used during AI processing; WebSkins does not intentionally save those raw captures as a local history.
+Chrome local extension storage retains your model and skin preferences, saved CSS skins, design prompts and chat history, per-origin consent choices, marketplace votes, a random author identifier, and private publication-management keys. Saved local data is not a secure vault. Protect access to your browser profile. A random installation identifier is also retained locally for included-AI quotas. It is a quota hint, not verified identity. Raw captured page layout and screenshots are used during AI processing; WebSkins does not intentionally save those raw captures as a local history.
 
 ## Public marketplace
 
@@ -29,6 +29,8 @@ Publishing is optional and has a separate confirmation. A published skin can exp
 The marketplace receives a private management key for each publication and retains only its hash for ownership verification. The extension keeps the private management key locally. A public author ID or display name does not prove ownership. Older publications without this proof require independent operator review for removal.
 
 ## Network information and retention
+
+Marketplace and included-AI requests include the network information needed to handle an HTTP request. The shared AI service retains protected installation/network identifiers, request identifiers and usage/reservation amounts to enforce limits and prevent duplicate provider work. Prompt/result content is not logged or stored in plaintext; completed included results have encrypted recovery access for one hour to recover a lost response; expired ciphertext is deleted opportunistically and may remain in routine recovery copies until those rotate. Unknown provider outcomes retain a reservation and are never automatically reissued. No provider key is included in the extension for free mode.
 
 Marketplace requests include the network information needed to handle an HTTP request. The server uses secret-keyed HMAC network identifiers for abuse prevention, daily quotas and deduplicated like/install counts. Old metric rows are pruned after 90 days when the service starts. Counts are usage metrics, not verified unique people.
 

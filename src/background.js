@@ -44,7 +44,7 @@ async function handleMessage(message, sender) {
       const controller=new AbortController();
       activeAbortControllers.set(message.tabId,controller);
       activePageContexts.set(message.tabId,context);
-      const request={...message,signal:controller.signal};
+      const request={...message,mode:context.mode,signal:controller.signal};
       try{return message.action==='generate-skin'?await handleGenerate(request):await handleChatRefine(request);}
       finally{activePageContexts.delete(message.tabId);activeAbortControllers.delete(message.tabId);}
     }
@@ -93,11 +93,11 @@ function friendlyError(err) {
 
 // ===== Generate Skin (Multi-Cycle) =====
 
-async function handleGenerate({ tabId, prompt, signal }) {
+async function handleGenerate({ tabId, prompt, mode, signal }) {
   if (!navigator.onLine) throw new Error('You appear to be offline. Please check your connection.');
 
-  const apiKey = await getApiKey();
-  if (!apiKey) throw new Error('API key not set');
+  const apiKey = mode==='byok' ? await getApiKey() : null;
+  if (mode==='byok'&&!apiKey) throw new Error('Enter your own Claude key in Settings, or choose the free allowance.');
 
   const model = await getModel();
 
@@ -120,7 +120,7 @@ async function handleGenerate({ tabId, prompt, signal }) {
 
   // Apply CSS to page
   await sendToTab(tabId, { action: 'apply-css', css: result.css });
-  broadcastProgress(tabId, { stage: 'applied', cycle: 1, totalCycles: '?', message: 'Initial skin applied — reviewing...' });
+  broadcastProgress(tabId, { stage: 'applied', cycle: 1, totalCycles: '?', message: 'Initial skin applied.' });
 
   let currentCss = result.css;
   let currentName = result.name || 'Custom Skin';
@@ -129,7 +129,7 @@ async function handleGenerate({ tabId, prompt, signal }) {
   let lastQuality = 0;
 
   // Dynamic improvement: keep going until quality >= MIN_QUALITY or MAX_CYCLES hit
-  for (let i = 0; i < MAX_CYCLES; i++) {
+  for (let i = 0; i < (mode==='byok'?MAX_CYCLES:0); i++) {
     const cycleNum = i + 2;
     broadcastProgress(tabId, {
       stage: 'improving',
@@ -231,11 +231,11 @@ async function handleGenerate({ tabId, prompt, signal }) {
 
 // ===== Chat Refine =====
 
-async function handleChatRefine({ tabId, skinId, domain, message: userMessage, chatHistory, signal }) {
+async function handleChatRefine({ tabId, skinId, domain, message: userMessage, chatHistory, mode, signal }) {
   if (!navigator.onLine) throw new Error('You appear to be offline. Please check your connection.');
 
-  const apiKey = await getApiKey();
-  if (!apiKey) throw new Error('API key not set');
+  const apiKey = mode==='byok' ? await getApiKey() : null;
+  if (mode==='byok'&&!apiKey) throw new Error('Enter your own Claude key in Settings, or choose the free allowance.');
 
   const model = await getModel();
 
@@ -259,10 +259,10 @@ async function handleChatRefine({ tabId, skinId, domain, message: userMessage, c
   let suggestions = result.suggestions || [];
 
   await sendToTab(tabId, { action: 'apply-css', css: currentCss });
-  broadcastProgress(tabId, { stage: 'applied', message: 'Applied — reviewing for improvements...' });
+  broadcastProgress(tabId, { stage: 'applied', message: 'Design applied.' });
 
   // Multi-cycle improvement: screenshot → evaluate → improve
-  for (let i = 0; i < MAX_CYCLES; i++) {
+  for (let i = 0; i < (mode==='byok'?MAX_CYCLES:0); i++) {
     const cycleNum = i + 1;
     broadcastProgress(tabId, {
       stage: 'improving',

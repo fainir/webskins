@@ -127,3 +127,21 @@ export async function clearAllData() {
 export function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
 }
+
+// Included allowance is independent of a visitor's optional provider key.
+export async function getAiMode() {
+  const value=(await chrome.storage.local.get('webskins_ai_mode')).webskins_ai_mode;
+  return value==='byok'?'byok':'included';
+}
+export async function setAiMode(mode) {
+  if(!['included','byok'].includes(mode))throw new Error('Choose an AI mode');
+  await chrome.storage.local.set({webskins_ai_mode:mode});
+}
+export async function getAiActor() {
+  const key='webskins_ai_actor';
+  const saved=(await chrome.storage.local.get(key))[key];
+  if(typeof saved==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(saved))return saved;
+  const actor=crypto.randomUUID();
+  await chrome.storage.local.set({[key]:actor});
+  return actor;
+}
