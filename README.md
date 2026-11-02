@@ -25,3 +25,7 @@ The existing owner upload action now has a separate1.0.6 replacement candidate d
 ## Public website analytics
 
 The existing API serves an owned website at `/`, plus the version-specific `/privacy` document. Only the owned landing page may load optional Google Analytics, Mixpanel and Betterloop, after a local device choice; browser privacy signals override it. The extension, community API, installed dist/ZIP and candidate package are unchanged. Set optional `GA_ID`, `MIXPANEL_TOKEN` and `BETTERLOOP_KEY` public identifiers on the existing `webskins-api` service; unset identifiers stay disabled. `/analytics-config.json` exposes only those public browser identifiers. No new hosting, API secrets or browser permissions are needed.
+
+### Railway compatibility
+
+Production API settings are owned by the portfolio's `portfolio-webskins-web` named partial in the private product-readiness repository (`.railway/webskins.ts`). Variables, domains, volumes and extension files remain unmanaged by it. The deprecated backend `railway.json` is removed. Before rollout, retain the existing Dockerfile builder, `node src/index.js` start command, `/health`, one us-west2 replica and ON_FAILURE/10 restarts in the service configuration. Verify a zero-diff plan and the completed deployment's empty resolved-file manifest, unchanged persistent volume and healthy `/health` and `/privacy`. No extension rebuild or Store action is part of this maintenance.
