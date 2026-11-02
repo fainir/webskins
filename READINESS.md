@@ -60,3 +60,9 @@ Every row serves [GOAL.md](GOAL.md) and portfolio PT07. Done is verified, cut, o
 | C2 | New per-mode/site consent, no screenshots or automatic review in included mode | verified | Single fixed-task request with no provider fallback/retry. Existing BYOK consent cannot authorize the hosted path; source/cancellation/recovery checks pass. Public version-specific policy deployment6a892d98 SUCCESS/health200 and actual375/1440 pages accepted |
 | C3 | Compiled popup success, exhaustion, cancel and settings recovery | verified | Actual400x600 candidate included/no-key, quota and BYOK recovery pass; [candidate](readiness/claude-beta.md). Genuine installed check remains |
 | C4 | Actual installed included AI and updated Store distribution | owner | Genuine published-origin CSS API200 uses800input/1241output; compiled400x600 UI passes. Actual installed1.0.7 check and final Store upload require the owner; no browser-policy workaround. Final package3555cb5562026c42d4dfcadba501bd6a28ea71e3910d7ea2e43fd6be22322fff. [Handoff](readiness/claude-beta.md) |
+
+## Railway compatibility - November2
+
+| ID | Flow | Status | Evidence / next action |
+|---|---|---|---|
+| OPS1 | Deploy the API without retired legacy config while retaining the accepted extension/data | building (portfolio coordinator) | Existing public health200 and source86d707f retained; review/apply the exact named service partial, then verify source rollout, no legacy file, retained volume and health/privacy. No extension packaging. |
