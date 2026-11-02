@@ -65,4 +65,4 @@ Every row serves [GOAL.md](GOAL.md) and portfolio PT07. Done is verified, cut, o
 
 | ID | Flow | Status | Evidence / next action |
 |---|---|---|---|
-| OPS1 | Deploy the API without retired legacy config while retaining the accepted extension/data | building (portfolio coordinator) | Existing public health200 and source86d707f retained; review/apply the exact named service partial, then verify source rollout, no legacy file, retained volume and health/privacy. No extension packaging. |
+| OPS1 | Deploy the API without retired legacy config while retaining the accepted extension/data | verified | [Completed configuration/source readback](qa/railway-compatibility.md); SUCCESS, no resolved legacy file, original5000MB/data volume, health/privacy200 and plan0. Accepted extension/candidates untouched. |
