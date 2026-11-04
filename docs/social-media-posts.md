@@ -67,7 +67,7 @@ The difference between cycle 1 and cycle 3 is dramatic. First pass often has col
 After the automated cycles, there's a chat mode where the user can make targeted requests: "the sidebar is too bright" or "increase the font size on article text." Claude gets the current screenshot with each message, so it always knows the current state.
 
 **Technical notes:**
-- Uses the Messages API with `claude-sonnet-4-20250514` by default (configurable)
+- Uses the Messages API with `claude-sonnet-5-5` by default (configurable)
 - DOM structure is captured and sent as context alongside the screenshot
 - Each full generation (3 cycles + a couple chat messages) runs about $0.01-0.03 in API costs
 - Extension uses Manifest V3, all API calls go through the background service worker
