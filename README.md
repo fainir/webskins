@@ -1,6 +1,14 @@
 # WebSkins
 
-A desktop Chrome extension for user-requested CSS appearances, optional community sharing, and a separate marketplace API. Installed1.0.5 acceptance is retained. Source1.0.6 is a separate popup recovery/accessibility candidate; public Store publication still needs the owner. [Readiness](READINESS.md), [retained evidence](qa/accepted.md).
+WebSkins is a desktop Chrome extension that creates a custom look for a website from a text prompt. You can also share skins through the community marketplace.
+
+**[Install WebSkins from the Chrome Web Store](https://chromewebstore.google.com/detail/webskins/fdjggaobnbpmajhobbcedeonbgmolala)**
+
+Add your own Anthropic API key in Settings, then open the extension on a site. Try “Make this page easier to read with larger text and more contrast” and choose **Generate Skin**. Anthropic bills API use.
+
+## Development status
+
+Installed1.0.5 acceptance is retained. Source1.0.6 is a separate popup recovery/accessibility candidate; public Store publication still needs the owner. [Readiness](READINESS.md), [retained evidence](qa/accepted.md).
 
 ## Develop and check
 
