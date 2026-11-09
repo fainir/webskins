@@ -8,7 +8,7 @@ Add your own Anthropic API key in Settings, then open the extension on a site. T
 
 ## Development status
 
-Installed1.0.5 acceptance is retained. Source1.0.6 is a separate popup recovery/accessibility candidate; public Store publication still needs the owner. [Readiness](READINESS.md), [retained evidence](qa/accepted.md).
+Version 1.0.5 was tested as a local installation. Version 1.0.6 is a separate popup recovery and accessibility candidate awaiting its Store submission. [Readiness](READINESS.md), [retained evidence](qa/accepted.md).
 
 ## Develop and check
 
